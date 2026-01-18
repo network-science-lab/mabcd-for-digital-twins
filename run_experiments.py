@@ -4,7 +4,7 @@ import argparse
 import yaml
 
 from src.generator import run_experiments as re_generator
-from src.finder import run_experiments as re_finder
+# from src.finder import run_experiments as re_finder
 from src.utils import set_rng_seed
 
 
@@ -15,8 +15,8 @@ def parse_args(*args):
         help="Experiment config file (default: config.yaml).",
         nargs="?",
         type=str,
-        # default="scripts/configs/example_generate.yaml",
-        default="scripts/configs/example_find.yaml",
+        default="scripts/configs/example_generate.yaml",
+        # default="scripts/configs/example_find.yaml",
     )
     return parser.parse_args(*args)
 
