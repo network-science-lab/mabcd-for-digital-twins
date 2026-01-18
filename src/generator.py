@@ -9,6 +9,8 @@ from tqdm import tqdm
 from src.mln_abcd.julia_wrapper import MLNConfig, MLNABCDGraphGenerator
 from src.params_handler import create_out_dir
 
+# TODO: add option to refer to config in another file
+
 
 def run_experiments(config: dict[str, Any]) -> None:
 
