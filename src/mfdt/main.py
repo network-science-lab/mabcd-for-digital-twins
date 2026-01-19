@@ -17,14 +17,14 @@ def parse_args(*args):
         help="Experiment config file (default: config.yaml).",
         nargs="?",
         type=str,
-        # default="scripts/configs/example_generate_1.yaml",
+        default="scripts/configs/example_generate_1.yaml",
         # default="scripts/configs/example_generate_2/runner_config.yaml",
-        default="scripts/configs/example_find.yaml",
+        # default="scripts/configs/example_find.yaml",
     )
     return parser.parse_args(*args)
 
 
-if __name__ == "__main__":
+def main():
 
     args = parse_args()
     with open(args.config, "r", encoding="utf-8") as f:

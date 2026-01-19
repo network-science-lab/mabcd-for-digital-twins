@@ -22,14 +22,23 @@ This repository is a complementary artifact for the [paper]().
 
 ## Runtime Configuration
 
-First, ...
-
-uv tool install dvc[gdrive]
-
+1. Install [uv](https://uv.run/) as the project is built with it.
+2. Install the project dependencies:
+   ```bash
+   uv install .
+   ```
+3. Additionally, to use DVC with Google Drive as remote storage, install:
+   ```bash
+   uv tool install dvc[gdrive]
+   ```
+4. Download the data required for experiments using DVC:
+   ```bash
+   dvc pull
+   ```
 
 ## Usage
 
-To run the code execute: `python run_experiments.py <path to the configuration file>`.
+To run the code execute: `uv run mfdt <path to the configuration file>`.
 
 There're three main functionalities provided by this repository:
 1. **mABCD Generator**: Generates mABCD twins for given networks.
@@ -58,8 +67,8 @@ This work was supported by the...
 
 ## Doodles
 
-- add uv
-- migrate to the server
+As for uv, I'm still learning it, so some parts may be not optimal. I'm trying to follow our
+colleagues from https://github.com/neptune-ai/neptune-exporter
 
 improve estimating r
 how to handle batches of networks?
