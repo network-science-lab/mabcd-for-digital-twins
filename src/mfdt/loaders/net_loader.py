@@ -9,11 +9,11 @@ import network_diffusion as nd
 import networkx as nx
 from tqdm import tqdm
 
-from src.loaders.constants import MLN_ABCD_DATA_PATH
-from src.loaders.small_artificial import load_small_artificial
-from src.loaders.small_real import load_small_real
-from src.loaders.big_real import load_big_real
-from src.mln_abcd.julia_reader import load_edgelist
+from mfdt.loaders.constants import MLN_ABCD_DATA_PATH
+from mfdt.loaders.small_artificial import load_small_artificial
+from mfdt.loaders.small_real import load_small_real
+from mfdt.loaders.big_real import load_big_real
+from mfdt.mln_abcd.julia_reader import load_edgelist
 
 
 def read_mlnabcd_networks(net_name: str) -> dict[str, nd.MultilayerNetwork]:

@@ -9,8 +9,8 @@ from typing import Callable
 import network_diffusion as nd
 
 
-MLN_RAW_DATA_PATH = Path(__file__).parent.parent.parent / "data/networks"
-MLN_ABCD_DATA_PATH = Path(__file__).parent.parent.parent / "data/nets_generated"
+MLN_RAW_DATA_PATH = Path(__file__).parent.parent.parent.parent / "data/networks"
+MLN_ABCD_DATA_PATH = Path(__file__).parent.parent.parent.parent / "data/nets_generated"
 
 # network names
 ARXIV_NETSCIENCE_COAUTHORSHIP = "arxiv_netscience_coauthorship"

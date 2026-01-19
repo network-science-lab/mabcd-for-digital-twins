@@ -2,10 +2,12 @@
 
 import argparse
 import yaml
+import juliacall
 
-from src.generator import run_experiments as re_generator
-from src.finder import run_experiments as re_finder
-from src.utils import set_rng_seed
+from network_diffusion.utils import set_rng_seed
+
+from mfdt.generator import run_experiments as re_generator
+from mfdt.finder import run_experiments as re_finder
 
 
 def parse_args(*args):

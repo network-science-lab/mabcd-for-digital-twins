@@ -10,7 +10,7 @@ import pandas as pd
 import powerlaw
 from scipy.stats import kendalltau
 
-from src.config_finder import correlations, helpers
+from mfdt.config_finder import correlations, helpers
 
 
 def get_q(net: nx.Graph, num_actors: int) -> float:

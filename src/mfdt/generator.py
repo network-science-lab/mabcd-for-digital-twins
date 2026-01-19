@@ -7,8 +7,8 @@ import numpy as np
 import yaml
 from tqdm import tqdm
 
-from src.mln_abcd.julia_wrapper import MLNConfig, MLNABCDGraphGenerator
-from src.params_handler import create_out_dir
+from mfdt.mln_abcd.julia_wrapper import MLNConfig, MLNABCDGraphGenerator
+from mfdt.params_handler import create_out_dir
 
 
 def read_mln_config_from_params(mln_config: dict[str, Any]) -> MLNConfig:

@@ -2,7 +2,7 @@
 
 import network_diffusion as nd
 
-from src.loaders.constants import (
+from mfdt.loaders.constants import (
     MLN_RAW_DATA_PATH,
     ER1,
     ER2,

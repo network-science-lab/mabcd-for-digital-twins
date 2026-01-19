@@ -272,7 +272,7 @@ if __name__ == "__main__":
     MLNABCDGraphGenerator()(config=mln_config)
 
     # or from file
-    with open("scripts/configs/example_generate.yaml", "r") as file:
+    with open("scripts/configs/example_generate_1.yaml", "r") as file:
         _config = yaml.safe_load(file)
     config = _config["mln_config"]
     config["seed"] = _config["run"]["rng_seed"]

@@ -9,8 +9,8 @@ from typing import Any
 
 import network_diffusion as nd
 
-from src.loaders.net_loader import load_network
-from src.loaders.constants import SEPARATOR
+from mfdt.loaders.net_loader import load_network
+from mfdt.loaders.constants import SEPARATOR
 
 
 class JSONEncoder(json.JSONEncoder):

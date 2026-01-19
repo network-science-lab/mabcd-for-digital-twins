@@ -6,7 +6,7 @@ import pandas as pd
 import network_diffusion as nd
 import networkx as nx
 
-from src.loaders.constants import (
+from mfdt.loaders.constants import (
     MLN_RAW_DATA_PATH,
     ARXIV_NETSCIENCE_COAUTHORSHIP,
     ARXIV_NETSCIENCE_COAUTHORSHIP_MATH,

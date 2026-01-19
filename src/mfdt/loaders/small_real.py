@@ -4,7 +4,7 @@ import pandas as pd
 import network_diffusion as nd
 import networkx as nx
 
-from src.loaders.constants import (
+from mfdt.loaders.constants import (
     MLN_RAW_DATA_PATH,
     AUCS,
     CKM_PHYSICIANS,
@@ -19,7 +19,7 @@ from src.loaders.constants import (
     WILDCARD_ALL,
     return_some_layers
 )
-from src.loaders.fmri74 import read_fmri74
+from mfdt.loaders.fmri74 import read_fmri74
 
 
 def _network_from_pandas(path: str) -> nd.MultilayerNetwork:

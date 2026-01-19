@@ -1,9 +1,7 @@
 import datetime
 import warnings
-from math import log10
 
 import git
-from network_diffusion.utils import fix_random_seed
 
 
 warnings.filterwarnings(action="ignore", category=FutureWarning)
@@ -25,7 +23,3 @@ def get_recent_git_sha() -> str:
     repo = git.Repo(search_parent_directories=True)
     git_sha = repo.head.object.hexsha
     return git_sha
-
-
-def set_rng_seed(seed: int) -> None:
-    fix_random_seed(seed=seed) # TODO: use it directly from nd once new version is released

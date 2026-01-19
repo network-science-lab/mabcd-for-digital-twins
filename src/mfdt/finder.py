@@ -8,9 +8,9 @@ import numpy as np
 import yaml
 from tqdm import tqdm
 
-from src.params_handler import Network, load_networks, create_out_dir
-from src.mln_abcd.julia_wrapper import MLNABCDGraphGenerator, MLNConfig, BaseMLNConfig
-from src.config_finder.config_model import get_edges_cor, get_layer_params
+from mfdt.params_handler import Network, load_networks, create_out_dir
+from mfdt.mln_abcd.julia_wrapper import MLNABCDGraphGenerator, MLNConfig, BaseMLNConfig
+from mfdt.config_finder.config_model import get_edges_cor, get_layer_params
 
 
 def estimate_config(network: Network, target_dir: Path) -> None:
