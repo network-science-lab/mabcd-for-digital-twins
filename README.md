@@ -24,6 +24,9 @@ This repository is a complementary artifact for the [paper]().
 
 First, ...
 
+uv tool install dvc[gdrive]
+
+
 ## Usage
 
 To run the code execute: `python run_experiments.py <path to the configuration file>`.
