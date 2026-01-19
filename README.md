@@ -11,10 +11,6 @@ A repository for...
 
 This repository is a complementary artifact for the [paper]().
 
-## Methodology
-
-The methodology employed for assessing///
-
 ## Structure of the Repository
 
 ```bash
@@ -32,20 +28,38 @@ First, ...
 
 To run the code execute: `python run_experiments.py <path to the configuration file>`.
 
+There're three main functionalities provided by this repository:
+1. **mABCD Generator**: Generates mABCD twins for given networks.
+2. **mABCD Finder**: Finds mABCD twins for given networks.
+3. **Proximity Evaluator**: Evaluates the proximity between original networks and their mABCD twins.
+
+### 1. mABCD Generator
+
+See `scripts/configs/example_generate_1.yaml` for an example configuration file where all
+parameters are defined explicitly. See `scripts/configs/example_generate_2` for an example where
+parameters are read from another file, e.g., have been estimated with the finder.
+
+### 2. mABCD Finder
+
+See `scripts/configs/example_find.yaml` for an example configuration file that estimates mABCD
+parameters for the provided networks.
+
+### 3. Proximity Evaluator
+
+TO DO!!!
+
 ## Acknowledgment
 
 This work was supported by the...
 
 
-## TODO
+## Doodles
+
 - add uv
 - migrate to the server
 
-three entrypoints:
-- 1 mabcd generator
-- 2 mabcd finder
-- 3 proximity evaluator
-
-1 - done
-2 - todo: improve estimating r
-3 - do it!
+improve estimating r
+how to handle batches of networks?
+where can we assess quality of estimation?
+- during the estimation process and generate a report along with the parameters
+- after the estimation process using the proximity evaluator

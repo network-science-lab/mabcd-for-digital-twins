@@ -3,15 +3,15 @@ run:
   rng_seed: 43
 
 mln_config:
-  params_path: "./examples/generate/example_twin_config.yaml" # configuration parameters file
+  params_path: "./scripts/configs/example_generate_2/mln_config.yaml" # configuration parameters file
   d_max_iter: 1000 # all parameters defined explicitly will overwrite those in the params_path file
   c_max_iter: 1000
   t: 100
   eps: 0.05
   d: 2
-  edges_filename: edges.dat
-  communities_filename: communities.dat
+  edges_filename: twin_edges.dat
+  communities_filename: twin_communities.dat
 
 generator:
   repetitions: 5
-  out_dir: "./examples/generate"
+  out_dir: "./examples/generate_2"
