@@ -1,83 +1,72 @@
-"""Infer configuration model for the real networks."""
+"""Infer configuration model for real networks."""
 
-import warnings
+import json
+from typing import Any
 from pathlib import Path
 
+import numpy as np
 import yaml
+from tqdm import tqdm
 
+from src.params_handler import Network, load_networks, create_out_dir
 from src.mln_abcd.julia_wrapper import MLNABCDGraphGenerator, MLNConfig, BaseMLNConfig
-from src.mln_abcd.config_finder import config_model
-from src.loaders.net_loader import load_network
-from src.utils import set_rng_seed
-import json
+from src.config_finder.config_model import get_edges_cor, get_layer_params
 
 
-NETWORKS = [
-    # ("bigreal", "arxiv_netscience_coauthorship"),
-    ("smallreal", "aucs"),
-    # ("bigreal", "cannes"),  # TODO: compute it on the server - it's too heavy
-    # ("smallreal", "ckm_physicians"),
-    # ("smallreal", "eu_transportation"),  # TODO: too big errors for this network!
-    # ("smallreal", "l2_course_net_1"),
-    # ("smallreal", "lazega"),
-    # ("bigreal", "timik1q2009"),
-    # ("smallreal", "toy_network"),
-]
+def estimate_config(network: Network, target_dir: Path) -> None:
+    """Estimate configuration for given network and save it as a yaml file."""
 
-RNG_SEED = 42
+    out_dir = create_out_dir(target_dir / network.n_type)
 
-OUT_DIR = Path(__file__).parent.parent / "data/nets_properties/configuration_model2"
+    l_map = {l_name: l_idx for l_idx, l_name in enumerate(sorted(network.n_graph_nx.layers), 1)}
+    json.dump(l_map, open(out_dir / f"{network.n_name}_lmap.json", "w"))
 
-
-def main(net_type: str, net_name: str, out_dir: Path) -> None:
-
-    ref_net = load_network(net_type, net_name)[(net_type, net_name)]
-    layers_mapping = {l_name: l_idx for l_idx, l_name in enumerate(sorted(ref_net.layers), 1)}
-    json.dump(layers_mapping, open(out_dir / f"{net_name}_lmap.json", "w"))
-
-    n = ref_net.get_actors_num()
+    n = network.n_graph_nx.get_actors_num()
 
     # infer edges' correlation matrix
-    edges_cor = config_model.get_edges_cor(net=ref_net)
-    edges_cor = edges_cor.rename(layers_mapping, axis=0)
-    edges_cor = edges_cor.rename(layers_mapping, axis=1)
+    edges_cor = get_edges_cor(net=network.n_graph_nx)
+    edges_cor = edges_cor.rename(l_map, axis=0)
+    edges_cor = edges_cor.rename(l_map, axis=1)
 
     # infer layers' parameters
-    layers_par = config_model.get_layer_params(net=ref_net)
-    layers_par = layers_par.rename(layers_mapping, axis=0)
+    layers_par = get_layer_params(net=network.n_graph_nx)
+    layers_par = layers_par.rename(l_map, axis=0)
 
     # debugging
-    # edges_cor_path = out_dir / f"{net_name}_edges.csv"
+    # edges_cor_path = out_dir / f"{network.n_name}_edges.csv"
     # edges_cor.to_csv(edges_cor_path)
-    # layers_par_path = out_dir / f"{net_name}_layers.csv"
+    # layers_par_path = out_dir / f"{network.n_name}_layers.csv"
     # layers_par.to_csv(layers_par_path, index=False)
 
     # save estimated config
     est_config = BaseMLNConfig(n=n, edges_cor=edges_cor, layer_params=layers_par)
-    with open(out_dir / f"{net_name}_config.yaml", "w", encoding="utf-8") as f:
+    with open(out_dir / f"{network.n_name}_config.yaml", "w", encoding="utf-8") as f:
         yaml.dump(est_config.to_yaml(), f, sort_keys=False, indent=4)
 
     # test generation of a network from the inferred config
-    with open(out_dir / f"{net_name}_config.yaml", "r", encoding="utf-8") as f:
-        dict_config = yaml.safe_load(f)
-    dict_config["seed"] = RNG_SEED
-    dict_config["d_max_iter"] = 1000
-    dict_config["c_max_iter"] = 1000
-    dict_config["t"] = 100
-    dict_config["eps"] = 0.01
-    dict_config["d"] = 2
-    dict_config["edges_filename"] = str(out_dir / f"{net_name}-twin_edges.dat")
-    dict_config["communities_filename"] = str(out_dir / f"{net_name}-twin_communities.dat")
-    mln_config = MLNConfig.from_yaml(dict_config)
-    MLNABCDGraphGenerator()(config=mln_config)
-    warnings.warn("The approximation error is not implemented yet") # TODO: address it!
+    # with open(out_dir / f"{network.n_name}_config.yaml", "r", encoding="utf-8") as f:
+    #     dict_config = yaml.safe_load(f)
+    # dict_config["seed"] = 42
+    # dict_config["d_max_iter"] = 1000
+    # dict_config["c_max_iter"] = 1000
+    # dict_config["t"] = 100
+    # dict_config["eps"] = 0.01
+    # dict_config["d"] = 2
+    # dict_config["edges_filename"] = str(out_dir / f"{network.n_name}-twin_edges.dat")
+    # dict_config["communities_filename"] = str(out_dir / f"{network.n_name}-twin_communities.dat")
+    # mln_config = MLNConfig.from_yaml(dict_config)
+    # MLNABCDGraphGenerator()(config=mln_config)
+    # warnings.warn("The approximation error is not implemented yet")
 
 
-if __name__ == "__main__":
+def run_experiments(config: dict[str, Any]) -> None:
 
-    set_rng_seed(seed=RNG_SEED)
-    OUT_DIR.mkdir(exist_ok=True, parents=True)
+    nets = load_networks(networks=config["networks"], device="cpu")
+    out_dir = create_out_dir(config["finder"]["out_dir"])
 
-    for (net_type, net_name) in NETWORKS:
-        print(net_type, net_name)
-        main(net_type, net_name, OUT_DIR)
+    p_bar = tqdm(np.arange(len(nets)), desc="", leave=False, colour="green")
+    for net_idx in p_bar:
+        net = nets[net_idx]
+        p_bar.set_description_str(net.rich_name)
+        estimate_config(network=net, target_dir=out_dir)
+

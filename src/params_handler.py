@@ -24,7 +24,7 @@ class JSONEncoder(json.JSONEncoder):
 class Network:
     n_type: str
     n_name: str
-    n_graph_pt: nd.MultilayerNetworkTorch
+    # n_graph_pt: nd.MultilayerNetworkTorch
     n_graph_nx: nd.MultilayerNetwork
 
     @property
@@ -48,7 +48,7 @@ def get_parameter_space(
     return list(p_space)
 
 
-def create_out_dir(out_dir: str) -> Path:
+def create_out_dir(out_dir: str | Path) -> Path:
     try:
         out_dir_path = Path(out_dir)
         out_dir_path.mkdir(exist_ok=True, parents=True)
@@ -64,13 +64,13 @@ def load_networks(networks: list[str], device: str) -> list[Network]:
         net_type, net_name = net_regex.split(SEPARATOR)
         print(f"Loading network(s): {net_type} - {net_name}")
         for (net_type, net_name), net_graph in load_network(net_type=net_type, net_name=net_name).items():
-            print("\tconverting to PyTorch")
+            # print("\tconverting to PyTorch")
             nets.append(
                 Network(
                     n_type=net_type,
                     n_name=net_name,
                     n_graph_nx=net_graph,
-                    n_graph_pt=nd.MultilayerNetworkTorch.from_mln(net_graph, device)
+                    # n_graph_pt=nd.MultilayerNetworkTorch.from_mln(net_graph, device)
                 )
             )
     print(f"Loaded {len(nets)} networks")
