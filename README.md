@@ -47,5 +47,5 @@ three entrypoints:
 - 3 proximity evaluator
 
 1 - done
-2 - todo: modify the finder script into a job, but keep estimation of all paramers at once. also improve estimating r
+2 - todo: improve estimating r
 3 - do it!

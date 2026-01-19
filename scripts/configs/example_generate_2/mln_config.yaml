@@ -1,0 +1,45 @@
+seed: null
+n: 799
+edges_cor:
+-   - 1.0
+    - 0.46
+-   - 0.46
+    - 1.0
+layer_params:
+    q:
+    - 0.946
+    - 0.837
+    tau:
+    - 0.911
+    - 0.367
+    r:
+    - 0.274
+    - 0.029
+    gamma:
+    - 2.711
+    - 2.449
+    delta:
+    - 0.001
+    - 0.001
+    Delta:
+    - 0.086
+    - 0.081
+    beta:
+    - 2.294
+    - 5.118
+    s:
+    - 0.03
+    - 0.024
+    S:
+    - 0.11
+    - 0.136
+    xi:
+    - 0.517
+    - 0.516
+d_max_iter: null
+c_max_iter: null
+t: null
+eps: null
+d: null
+edges_filename: null
+communities_filename: null

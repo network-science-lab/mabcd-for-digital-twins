@@ -4,19 +4,30 @@ from typing import Any
 
 import juliacall
 import numpy as np
+import yaml
 from tqdm import tqdm
 
 from src.mln_abcd.julia_wrapper import MLNConfig, MLNABCDGraphGenerator
 from src.params_handler import create_out_dir
 
-# TODO: add option to refer to config in another file
+
+def read_mln_config_from_params(mln_config: dict[str, Any]) -> MLNConfig:
+    with open(mln_config["params_path"], "r", encoding="utf-8") as f:
+        dict_config = yaml.safe_load(f)
+    for key, value in mln_config.items():
+        if key != "params_path" and value is not None:
+            dict_config[key] = value
+    return MLNConfig.from_yaml(dict_config)
 
 
 def run_experiments(config: dict[str, Any]) -> None:
 
     _mln_config = config["mln_config"]
     _mln_config["seed"] = config["run"]["rng_seed"]
-    mln_config = MLNConfig.from_yaml(_mln_config)
+    if _mln_config.get("params_path") is None:
+        mln_config = MLNConfig.from_yaml(_mln_config)
+    else:
+        mln_config = read_mln_config_from_params(_mln_config)
 
     repetitions = config["generator"]["repetitions"]
     out_dir = create_out_dir(config["generator"]["out_dir"])
