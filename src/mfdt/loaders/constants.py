@@ -35,6 +35,7 @@ SF3 = "sf3"
 SF5 = "sf5"
 TIMIK1Q2009 = "timik1q2009"
 TOY_NETWORK = "toy_network"
+FREEBASE = 'Freebase'
 
 MLNABCD_PREFIX = "mlnabcd"
 

@@ -1,0 +1,6 @@
+outs:
+- md5: 09ed07a38f7b269559854f3e66bfeb26.dir
+  size: 1509161
+  nfiles: 3
+  hash: md5
+  path: Freebase
