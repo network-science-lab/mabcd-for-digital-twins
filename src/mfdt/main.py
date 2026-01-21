@@ -1,5 +1,9 @@
 """Main entry point to run experiments."""
 
+# TODO: consider adding hydra
+# TODO: consider adding logging
+# TODO: in the camera-ready version, run black or other code formatter on the codebase
+
 import argparse
 import yaml
 import juliacall
@@ -25,6 +29,7 @@ def parse_args(*args):
 
 
 def main():
+    """Main entrypoint for the code."""
 
     args = parse_args()
     with open(args.config, "r", encoding="utf-8") as f:
@@ -44,3 +49,8 @@ def main():
 
     print(f"Inferred experiment type as: {experiment_type}")
     entrypoint(config)
+
+
+if __name__ == "__main__":
+    print("Use only for VS Code debugging purposes!")
+    main()
