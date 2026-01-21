@@ -1,0 +1,30 @@
+[project]
+name = "mfdt"
+version = "0.2.0"
+description = "mABCD for Digital Twins (mfdt)"
+readme = "README.md"
+authors = [
+    { name = "Michał Czuba", email = "michal.czuba@pwr.edu.pl" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "dvc>=3.66.1",
+    "dvc-gdrive>=3.0.1",
+    "gitpython>=3.1.46",
+    "juliacall>=0.9.31",
+    "networkx>=3.6.1",
+    "network-diffusion>=0.18.1",
+    "numpy>=2.0.2",
+    "pandas>=2.2.3",
+    "powerlaw>=2.0.0",
+    "pyyaml>=6.0.3",
+    "scikit-learn>=1.8.0",
+    "tqdm>=4.66.6",
+]
+
+[project.scripts]
+mfdt = "mfdt.main:main"
+
+[build-system]
+requires = ["uv_build>=0.9.18,<0.10.0"]
+build-backend = "uv_build"

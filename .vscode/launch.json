@@ -1,0 +1,21 @@
+
+// 1. Open the Command Palette (shift + apple + p)
+// 2. Select "Python: Select Interpreter"
+// 3. Select the python version at .venv/bin/python
+
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "mfdt",
+      "type": "python",
+      "request": "launch",
+      "module": "mfdt.main",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "args": [
+        "scripts/configs/example_find.yaml"
+      ]
+    }
+  ]
+}

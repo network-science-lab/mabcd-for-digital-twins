@@ -1,0 +1,33 @@
+run:
+  experiment_type: "find"
+  rng_seed: 43
+
+networks: [
+  # mlnabcd^series_1/edges_2.dat,
+  # mlnabcd^series_1/*,  # or with a wildcard
+  # "bigreal^arxiv_netscience_coauthorship",
+  # "bigreal^arxiv_netscience_coauthorship_math.oc",
+  # "bigreal^cannes",  # TODO: compute it on the server - it's too heavy
+  # "bigreal^timik1q2009",
+  "smallreal^aucs",
+  # "smallreal^ckm_physicians",
+  # "smallreal^eu_transportation",  # TODO: too big errors for this network!
+  # "smallreal^eu_transport_klm",
+  # "smallreal^fmri74",
+  # "smallreal^lazega",
+  # "smallreal^l2_course_net_1",
+  # "smallreal^l2_course_net_2",
+  # "smallreal^l2_course_net_3",
+  # "smallreal^toy_network",
+  # "smallart^er1",
+  # "smallart^er2",
+  # "smallart^er3",
+  # "smallart^er5",
+  # "smallart^sf1",
+  "smallart^sf2",
+  # "smallart^sf3",
+  # "smallart^sf5",
+]
+
+finder:
+  out_dir: "./examples/find"

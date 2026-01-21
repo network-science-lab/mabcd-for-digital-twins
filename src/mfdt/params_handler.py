@@ -1,0 +1,77 @@
+"""A script with functions to facilitate loading simulation's parameters and input data."""
+
+import itertools
+import json
+import tempfile
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+import network_diffusion as nd
+
+from mfdt.loaders.net_loader import load_network
+from mfdt.loaders.constants import SEPARATOR
+
+
+class JSONEncoder(json.JSONEncoder):
+    def default(self, obj) -> dict[str, Any]:
+        if isinstance(obj, nd.MLNetworkActor):
+            return obj.__dict__
+        return super().default(obj)
+
+
+@dataclass(frozen=True)
+class Network:
+    n_type: str
+    n_name: str
+    # n_graph_pt: nd.MultilayerNetworkTorch
+    n_graph_nx: nd.MultilayerNetwork
+
+    @property
+    def rich_name(self) -> str:
+        _type = self.n_type.replace("/", ".")
+        _name = self.n_name.replace("/", ".")
+        if _type == _name:
+            return _type
+        return f"{_type}{SEPARATOR}{_name}"
+
+
+def get_parameter_space(
+    protocols: list[str],
+    probabs: list[float],
+    seed_budgets: list[float],
+    ss_methods: list[str],
+    networks: list[tuple[str, str]],
+) -> list[tuple[str, tuple[float, float], float, tuple[str, str], str]]:
+    seed_budgets_full = [(100 - i, i) for i in seed_budgets]
+    p_space = itertools.product(protocols, seed_budgets_full, probabs, networks, ss_methods)
+    return list(p_space)
+
+
+def create_out_dir(out_dir: str | Path) -> Path:
+    try:
+        out_dir_path = Path(out_dir)
+        out_dir_path.mkdir(exist_ok=True, parents=True)
+    except FileExistsError:
+        print("Redirecting output to hell...")
+        out_dir_path = Path(tempfile.mkdtemp())
+    return out_dir_path
+
+
+def load_networks(networks: list[str], device: str) -> list[Network]:
+    nets = []
+    for net_regex in networks:
+        net_type, net_name = net_regex.split(SEPARATOR)
+        print(f"Loading network(s): {net_type} - {net_name}")
+        for (net_type, net_name), net_graph in load_network(net_type=net_type, net_name=net_name).items():
+            # print("\tconverting to PyTorch")
+            nets.append(
+                Network(
+                    n_type=net_type,
+                    n_name=net_name,
+                    n_graph_nx=net_graph,
+                    # n_graph_pt=nd.MultilayerNetworkTorch.from_mln(net_graph, device)
+                )
+            )
+    print(f"Loaded {len(nets)} networks")
+    return nets
