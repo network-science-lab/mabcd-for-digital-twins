@@ -11,6 +11,7 @@ from mfdt.loaders.constants import (
     ARXIV_NETSCIENCE_COAUTHORSHIP,
     ARXIV_NETSCIENCE_COAUTHORSHIP_MATH,
     CANNES,
+    FREEBASE,
     TIMIK1Q2009,
     WILDCARD_ALL,
     return_some_layers
@@ -92,6 +93,24 @@ def get_timik1q2009_network() -> nd.MultilayerNetwork:
     return nd.MultilayerNetwork.from_nx_layers(layer_graphs, layer_names)
 
 
+def get_adjlist_network(net_name) -> nd.MultilayerNetwork:
+    layers = []
+    layer_names = []
+
+    for file in (MLN_RAW_DATA_PATH / net_name).iterdir():
+        if file.suffix == ".adjlist":
+            layer = nx.read_adjlist(str(file))
+            layers.append(layer)
+            layer_names.append(file.stem)
+        else:
+            raise ValueError(f"Incompatible data file {str(file)}")
+
+    return nd.MultilayerNetwork.from_nx_layers(
+        network_list=layers,
+        layer_names=layer_names,
+    )
+
+
 def load_big_real(net_name: str) -> dict[str, nd.MultilayerNetwork]:
     loaded_nets = {}
     if net_name == ARXIV_NETSCIENCE_COAUTHORSHIP or net_name == WILDCARD_ALL:
@@ -102,4 +121,6 @@ def load_big_real(net_name: str) -> dict[str, nd.MultilayerNetwork]:
         loaded_nets[CANNES] = get_cannes_network()
     elif net_name == TIMIK1Q2009 or net_name == WILDCARD_ALL:
         loaded_nets[TIMIK1Q2009] = get_timik1q2009_network()
+    elif net_name in [FREEBASE, WILDCARD_ALL]:
+        loaded_nets[FREEBASE] = get_adjlist_network(net_name)
     return loaded_nets
