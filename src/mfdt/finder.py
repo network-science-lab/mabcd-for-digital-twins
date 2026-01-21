@@ -11,6 +11,7 @@ from tqdm import tqdm
 from mfdt.params_handler import Network, load_networks, create_out_dir
 from mfdt.mln_abcd.julia_wrapper import MLNABCDGraphGenerator, MLNConfig, BaseMLNConfig
 from mfdt.config_finder.config_model import estimate_config_rudimentarly
+from mfdt.config_finder.config_fancy import estimate_config_fancy
 
 
 def estimate_config(
@@ -21,8 +22,10 @@ def estimate_config(
     """Estimate configuration for given network and save it as a yaml file."""
     if method == "rudimentary":
         l_map, est_config = estimate_config_rudimentarly(net=network.n_graph_nx)
+    elif method == "fancy":
+        l_map, est_config = estimate_config_fancy(net=network.n_graph_nx)
     else:
-        raise ValueError("Method not implemented yet")
+        raise ValueError("Unknown estimation method!")
 
     # save estimated config
     out_dir = create_out_dir(target_dir / network.n_type)
