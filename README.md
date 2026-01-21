@@ -38,7 +38,8 @@ This repository is a complementary artifact for the [paper]().
 
 ## Usage
 
-To run the code execute: `uv run mfdt <path to the configuration file>`.
+To run the code execute: `uv run mfdt <path to the configuration file>`. To debug in VS Code, see
+`.vscode/launch.json` for an example configuration as `uv` is not widely supported yet by IDEs.
 
 There're three main functionalities provided by this repository:
 1. **mABCD Generator**: Generates mABCD twins for given networks.

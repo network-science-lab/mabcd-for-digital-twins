@@ -64,6 +64,7 @@ class MLNConfig(BaseMLNConfig):
     communities_filename: str
 
     def __post_init__(self) -> None:
+        # TODO: consider adding validation with pydantic
         self._rng = np.random.default_rng(seed=self.seed)
         assert isinstance(self.seed, int)
         assert isinstance(self.n, int)
@@ -272,7 +273,7 @@ if __name__ == "__main__":
     MLNABCDGraphGenerator()(config=mln_config)
 
     # or from file
-    with open("scripts/configs/example_generate_1.yaml", "r") as file:
+    with open("scripts/configs/example_generate_1.yaml", "r", encoding="utf-8") as file:
         _config = yaml.safe_load(file)
     config = _config["mln_config"]
     config["seed"] = _config["run"]["rng_seed"]

@@ -44,12 +44,7 @@ def get_tau(net: nd.MultilayerNetwork, alpha: float | None = 0.05) -> dict[str, 
             nan_policy="raise",
             variant="b",
         )
-        if not alpha:
-            tau[l_name] = statistic.item()
-        elif pvalue < alpha:
-            tau[l_name] = statistic.item()
-        else:
-            tau[l_name] = 0.0
+        tau[l_name] = statistic.item() if (not alpha or pvalue < alpha) else 0.0
     
     return tau
 

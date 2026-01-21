@@ -19,7 +19,7 @@ def estimate_config(network: Network, target_dir: Path) -> None:
     out_dir = create_out_dir(target_dir / network.n_type)
 
     l_map = {l_name: l_idx for l_idx, l_name in enumerate(sorted(network.n_graph_nx.layers), 1)}
-    json.dump(l_map, open(out_dir / f"{network.n_name}_lmap.json", "w"))
+    json.dump(l_map, open(out_dir / f"{network.n_name}_lmap.json", "w", encoding="utf-8"))
 
     n = network.n_graph_nx.get_actors_num()
 
