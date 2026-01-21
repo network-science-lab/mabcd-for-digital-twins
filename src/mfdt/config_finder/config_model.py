@@ -11,6 +11,7 @@ import powerlaw
 from scipy.stats import kendalltau
 
 from mfdt.config_finder import correlations, helpers
+from mfdt.mln_abcd.julia_wrapper import BaseMLNConfig
 
 
 def get_q(net: nx.Graph, num_actors: int) -> float:
@@ -133,14 +134,15 @@ def get_edges_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
 def get_layer_params(net: nd.MultilayerNetwork, seed: int | None = None) -> pd.DataFrame:
     """Infer layers' parameters used by MLNABCD for a given network."""
     q, gamma_delta_Delta, beta_s_S_xi = {}, {}, {}
-    tau = get_tau(net, alpha=None)
-    r = get_r(net, seed=seed)
 
     nb_actors = net.get_actors_num()
     for l_name, l_graph in net.layers.items():
         q[l_name] = get_q(l_graph, nb_actors)
         gamma_delta_Delta[l_name] = get_gamma_delta_Delta(l_graph)
         beta_s_S_xi[l_name] = get_beta_s_S_xi(l_graph)
+
+    tau = get_tau(net, alpha=None)
+    r = get_r(net, seed=seed)
 
     params_dict = {
         l_name: {
@@ -154,3 +156,16 @@ def get_layer_params(net: nd.MultilayerNetwork, seed: int | None = None) -> pd.D
     }
     params_df = pd.DataFrame(params_dict).T.sort_index()
     return params_df.round(3).replace(0.0, 0.001)
+
+
+def estimate_config_rudimentarly(net: nd.MultilayerNetwork) -> tuple[dict[str, int], BaseMLNConfig]:
+    """Estimate configuration for given network in the barbarian way."""
+    l_map = {l_name: l_idx for l_idx, l_name in enumerate(sorted(net.layers), 1)}
+    n = net.get_actors_num()
+    edges_cor = get_edges_cor(net=net)
+    edges_cor = edges_cor.rename(l_map, axis=0)
+    edges_cor = edges_cor.rename(l_map, axis=1)
+    layers_par = get_layer_params(net=net)
+    layers_par = layers_par.rename(l_map, axis=0)
+    est_config = BaseMLNConfig(n=n, edges_cor=edges_cor, layer_params=layers_par)
+    return l_map, est_config

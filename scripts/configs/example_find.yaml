@@ -10,7 +10,7 @@ networks: [
     # "bigreal^cannes",  # TODO: compute it on the server - it's too heavy
     # "bigreal^timik1q2009",
     # "bigreal^Freebase",
-    "smallreal^aucs",
+    # "smallreal^aucs",
     # "smallreal^ckm_physicians",
     # "smallreal^eu_transportation",  # TODO: too big errors for this network!
     # "smallreal^eu_transport_klm",
@@ -32,3 +32,5 @@ networks: [
 
 finder:
   out_dir: "./examples/find"
+  method: "rudimentary"
+  # method: "fancy"
