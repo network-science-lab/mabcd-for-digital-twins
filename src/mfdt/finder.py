@@ -18,12 +18,13 @@ def estimate_config(
     network: Network,
     target_dir: Path,
     method: Literal["rudimentary", "fancy"],
+    rng_seed: int,
 ) -> None:
     """Estimate configuration for given network and save it as a yaml file."""
     if method == "rudimentary":
-        l_map, est_config = estimate_config_rudimentarly(net=network.n_graph_nx)
+        l_map, est_config = estimate_config_rudimentarly(net=network.n_graph_nx, seed=rng_seed)
     elif method == "fancy":
-        l_map, est_config = estimate_config_fancy(net=network.n_graph_nx)
+        l_map, est_config = estimate_config_fancy(net=network.n_graph_nx, seed=rng_seed)
     else:
         raise ValueError("Unknown estimation method!")
 
@@ -59,11 +60,12 @@ def run_experiments(config: dict[str, Any]) -> None:
     nets = load_networks(networks=config["networks"], device="cpu")
     out_dir = create_out_dir(config["finder"]["out_dir"])
     method = config["finder"]["method"]
+    rng_seed = config["run"]["rng_seed"]
 
     p_bar = tqdm(np.arange(len(nets)), desc="", leave=False, colour="green")
     print("Starting configuration estimation...")
     for net_idx in p_bar:
         net = nets[net_idx]
         p_bar.set_description_str(net.rich_name)
-        estimate_config(network=net, target_dir=out_dir, method=method)
+        estimate_config(network=net, target_dir=out_dir, method=method, rng_seed=rng_seed)
     print(f"Estimated configs saved.")

@@ -158,14 +158,17 @@ def get_layer_params(net: nd.MultilayerNetwork, seed: int | None = None) -> pd.D
     return params_df.round(3).replace(0.0, 0.001)
 
 
-def estimate_config_rudimentarly(net: nd.MultilayerNetwork) -> tuple[dict[str, int], BaseMLNConfig]:
+def estimate_config_rudimentarly(
+    net: nd.MultilayerNetwork,
+    seed: int | None = None,
+) -> tuple[dict[str, int], BaseMLNConfig]:
     """Estimate configuration for given network in the barbarian way."""
     l_map = {l_name: l_idx for l_idx, l_name in enumerate(sorted(net.layers), 1)}
     n = net.get_actors_num()
     edges_cor = get_edges_cor(net=net)
     edges_cor = edges_cor.rename(l_map, axis=0)
     edges_cor = edges_cor.rename(l_map, axis=1)
-    layers_par = get_layer_params(net=net)
+    layers_par = get_layer_params(net=net, seed=seed)
     layers_par = layers_par.rename(l_map, axis=0)
     est_config = BaseMLNConfig(n=n, edges_cor=edges_cor, layer_params=layers_par)
     return l_map, est_config
