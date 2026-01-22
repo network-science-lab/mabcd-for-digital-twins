@@ -123,7 +123,7 @@ def get_beta_s_S_xi(net: nx.Graph) -> dict[str, float]:
 def get_edges_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
     """Get correlation matrix for edges."""
     edges_cor_raw = []
-    for la_name, lb_name in helpers.prepare_layer_pairs(net.layers.keys()):
+    for la_name, lb_name in helpers.prepare_layer_pairs(list(net.layers.keys())):
         aligned_layers = helpers.align_layers(net, la_name, lb_name, "destructive")
         edges_stat = correlations.edges_r(aligned_layers[la_name], aligned_layers[lb_name])
         edges_cor_raw.append({(la_name, lb_name): edges_stat})
