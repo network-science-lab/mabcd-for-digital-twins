@@ -2,6 +2,7 @@
 
 import networkx as nx
 import network_diffusion as nd
+import numpy as np
 import pandas as pd
 from sklearn.metrics import adjusted_mutual_info_score
 
@@ -33,10 +34,17 @@ def get_comm_ami(net: nd.MultilayerNetwork, seed: int | None = None) -> pd.DataF
     return part_cor_df  # .round(3).fillna(0.0)
 
 
+def frobenius_norm(comm_ami: pd.DataFrame) -> float:
+    """Get Frobenius norm from the inter-layer community 'correlation' matrix."""
+    ca_arr = comm_ami.to_numpy()
+    return np.linalg.norm(ca_arr, ord="fro").item()
+
+
 def get_r_fancy(net: nd.MultilayerNetwork, seed: int | None = None) -> dict[str, float]:
     """Get correlations between partitions."""
     comm_ami = get_comm_ami(net, seed)
     print(comm_ami)
+    frobenius_norm(comm_ami)
 
     net = net.to_multiplex()[0]
     layer_names = sorted(list(net.layers))
