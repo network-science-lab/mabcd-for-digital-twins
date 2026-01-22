@@ -17,6 +17,7 @@ from mfdt.config_finder.config_model import (
     get_q,
     get_tau,
 )
+from mfdt.config_finder.figures import plot_optimisation_process
 from mfdt.loaders.net_loader import _prepare_network
 from mfdt.mln_abcd.julia_reader import load_edgelist
 from mfdt.mln_abcd.julia_wrapper import MLNABCDGraphGenerator, MLNConfig, BaseMLNConfig
@@ -162,10 +163,11 @@ def estimate_config_fancy(
     result = skopt.gp_minimize(
         func=objective,
         dimensions=r_space,
-        n_calls=10,
-        # n_initial_points=2,
+        n_calls=20,
         noise="gaussian",
         random_state=seed,
+        n_jobs=5,
     )
+    plot_optimisation_process(result, Path("optim_2.png"))
     fixed_mabcd_params.layer_params["r"] = result.x
     return l_map, fixed_mabcd_params
