@@ -3,25 +3,41 @@
 import networkx as nx
 import network_diffusion as nd
 import pandas as pd
+from sklearn.metrics import adjusted_mutual_info_score
 
-from mfdt.config_finder import correlations
+from mfdt.config_finder import correlations, helpers
 from mfdt.config_finder.config_model import (
     get_beta_s_S_xi,
     get_edges_cor,
     get_gamma_delta_Delta,
-    get_q, get_tau,
+    get_q,
+    get_tau,
+    get_r,
 )
 from mfdt.mln_abcd.julia_wrapper import MLNABCDGraphGenerator, MLNConfig, BaseMLNConfig
 
 
+def get_comm_ami(net: nd.MultilayerNetwork, seed: int | None = None) -> pd.DataFrame:
+    """Get interlatyer 'correlations' (i.e. AMI) between partitions."""
+    net = net.to_multiplex()[0]
+    part_cor_raw = []
+    for la_name, lb_name in helpers.prepare_layer_pairs(list(net.layers.keys())):
+        aligned_layers = helpers.align_layers(net, la_name, lb_name, "destructive")
+        part_ami = correlations.partitions_correlation(
+            aligned_layers[la_name],
+            aligned_layers[lb_name], 
+            seed=seed,
+        )
+        part_cor_raw.append({(la_name, lb_name): part_ami})
+    part_cor_df = helpers.create_correlation_matrix(part_cor_raw)
+    return part_cor_df  # .round(3).fillna(0.0)
+
+
 def get_r_fancy(net: nd.MultilayerNetwork, seed: int | None = None) -> dict[str, float]:
-    """
-    Get correlations between partitions.
-    
-    Note, that due to impossibility to reverse the process of creating partitions by MLNABCD, this
-    function only approximates the correlations as follows. It takes the first (alphabetically)
-    layer of the network as a reference. Then it uses it to compute correlations with other layers.
-    """
+    """Get correlations between partitions."""
+    comm_ami = get_comm_ami(net, seed)
+    print(comm_ami)
+
     net = net.to_multiplex()[0]
     layer_names = sorted(list(net.layers))
 
@@ -52,7 +68,8 @@ def get_layer_params_fancy(net: nd.MultilayerNetwork, seed: int | None = None) -
         beta_s_S_xi[l_name] = get_beta_s_S_xi(l_graph)
 
     tau = get_tau(net, alpha=None)
-    r = get_r_fancy(net, seed=seed)
+    get_r_fancy(net, seed=seed)
+    r = get_r(net, seed=seed)
 
     params_dict = {
         l_name: {
