@@ -1,7 +1,7 @@
 """Infer configuration model for real networks."""
 
 import json
-from typing import Any, Literal
+from typing import Any
 from pathlib import Path
 
 import numpy as np
@@ -17,16 +17,16 @@ from mfdt.config_finder.config_fancy import estimate_config_fancy
 def estimate_config(
     network: Network,
     target_dir: Path,
-    method: Literal["rudimentary", "fancy"],
+    method: dict[str, Any],
     rng_seed: int,
 ) -> None:
     """Estimate configuration for given network and save it as a yaml file."""
     out_dir = create_out_dir(target_dir / network.n_type / network.n_name)
-    if method == "rudimentary":
+    if method["name"] == "rudimentary":
         l_map, est_config = estimate_config_rudimentarly(net=network.n_graph_nx, seed=rng_seed)
-    elif method == "fancy":
+    elif method["name"] == "fancy":
         l_map, est_config = estimate_config_fancy(
-            net=network.n_graph_nx, seed=rng_seed, log_dir=out_dir / "logs"
+            net=network.n_graph_nx, log_dir=out_dir / "logs", **method["params"], seed=rng_seed,
         )
     else:
         raise ValueError("Unknown estimation method!")

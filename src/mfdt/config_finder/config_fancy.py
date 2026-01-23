@@ -2,7 +2,7 @@
 
 import tempfile
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable
 
 import network_diffusion as nd
 import numpy as np
@@ -56,6 +56,14 @@ def dummy_loss(A: np.ndarray, A_p: np.ndarray) -> float:
     return d_a.mean().item()
 
 
+def get_criterium(name: str) -> Callable:
+    if name == "frobenius":
+        return frobenius_loss
+    elif name == "dummy":
+        return dummy_loss
+    raise ValueError("Unknown criterium name")
+
+
 def estimate_all_but_r(net: nd.MultilayerNetwork) -> tuple[dict[str, int], BaseMLNConfig]:
     """Estimate configuration for given network in the barbarian way."""
     l_map = {l_name: l_idx for l_idx, l_name in enumerate(sorted(net.layers), 1)}
@@ -91,7 +99,7 @@ def estimate_all_but_r(net: nd.MultilayerNetwork) -> tuple[dict[str, int], BaseM
     return l_map, est_config
 
 
-def prepare_log_dir(out_dir: Path | None = None):
+def prepare_log_dir(out_dir: Path | None = None) -> Callable:
     """Prepare directory to store logs in if out_dir provided."""
     if out_dir:
         class OutDirServer:
@@ -126,7 +134,12 @@ def prepare_objective(
     A: np.ndarray,
     r_space: list[skopt.space.Real],
     criterium: Callable,
-    nb_twins: int = 5,
+    nb_twins: int,
+    d_max_iter: int,
+    c_max_iter: int,
+    t: int,
+    eps: float,
+    d: int,
     rng_seed: int | None = None,
     out_dir: Path | None = None,
 ) -> Callable:
@@ -141,11 +154,11 @@ def prepare_objective(
     :return: objective function to be optimised
     """
     fixed_dict = fixed_mabcd_params.to_yaml()
-    fixed_dict["d_max_iter"] = 1000
-    fixed_dict["c_max_iter"] = 1000
-    fixed_dict["t"] = 100
-    fixed_dict["eps"] = 0.05
-    fixed_dict["d"] = 2
+    fixed_dict["d_max_iter"] = d_max_iter
+    fixed_dict["c_max_iter"] = c_max_iter
+    fixed_dict["t"] = t
+    fixed_dict["eps"] = eps
+    fixed_dict["d"] = d
     seed_generator = np.random.default_rng(seed=rng_seed)
     out_dir_server = prepare_log_dir(out_dir)
 
@@ -200,8 +213,18 @@ def prepare_objective(
 
 def estimate_config_fancy(
     net: nd.MultilayerNetwork,
+    log_dir: Path,
+    save_logs: bool,
+    criterium: str,
+    decision_variables: Any,  # TODO: implement deision var choice
+    nb_twins: int,
+    nb_steps: int,
+    d_max_iter: int,
+    c_max_iter: int,
+    t: int,
+    eps: float,
+    d: int,
     seed: int | None = None,
-    log_dir: Path | None = None,
 ) -> tuple[dict[str, int], BaseMLNConfig]:
     """
     Estimate configuration for given network using optimisation mechanisms.
@@ -221,20 +244,25 @@ def estimate_config_fancy(
         skopt.space.Real(0.0, 1.0, name=f"r_{i}")
         for i in range(A.shape[0])
     ]
+    criterium_func = get_criterium(criterium)
     objective = prepare_objective(
-        fixed_mabcd_params,
-        A,
-        r_space,
-        # criterium=frobenius_loss,
-        criterium=dummy_loss,
-        nb_twins=3,
+        fixed_mabcd_params=fixed_mabcd_params,
+        A=A,
+        r_space=r_space,
+        criterium=criterium_func,
+        nb_twins=nb_twins,
+        d_max_iter=d_max_iter,
+        c_max_iter=c_max_iter,
+        t=t,
+        eps=eps,
+        d=d,
         rng_seed=seed,
-        out_dir=log_dir,
+        out_dir=log_dir if save_logs else None,
     )
     result = skopt.gp_minimize(
         func=objective,
         dimensions=r_space,
-        n_calls=10,
+        n_calls=nb_steps,
         noise="gaussian",
         random_state=seed,
         n_jobs=1,

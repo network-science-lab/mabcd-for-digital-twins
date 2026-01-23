@@ -77,7 +77,7 @@ def get_r(net: nd.MultilayerNetwork, seed: int | None = None) -> dict[str, float
     return r
 
 
-def _fit_exponent_powerlaw(raw_data: list[float | int]) -> float:
+def _fit_exponent_powerlaw(raw_data: list[int] | list[float]) -> float:
     results = powerlaw.Fit(raw_data, discrete=True, verbose=False)
     return results.alpha
 
@@ -94,7 +94,9 @@ def get_gamma_delta_Delta(net: nx.Graph) -> dict[str, float]:
     }
 
 
-def _avg_partitions_noise(net: nx.Graph, partitions: list[set[Any]]) -> float:
+def _avg_partitions_noise(
+    net: nx.Graph, partitions: list[set[Any]] | list[frozenset[Any]]
+) -> float:
     """
     The noise is fraction of edges inside partitions to number of all edges in the graph.
     
@@ -110,7 +112,8 @@ def _avg_partitions_noise(net: nx.Graph, partitions: list[set[Any]]) -> float:
 
 def get_beta_s_S_xi(net: nx.Graph) -> dict[str, float]:
     """Get powerlaw exponent and min/max community size for a given layer."""
-    partitions = nx.community.louvain_communities(net)
+    # partitions = nx.community.louvain_communities(net)
+    partitions = nx.community.greedy_modularity_communities(net)
     partitions_sizes = [len(part) for part in partitions]
     return {
         "beta": _fit_exponent_powerlaw(partitions_sizes),
