@@ -75,8 +75,8 @@ colleagues from https://github.com/neptune-ai/neptune-exporter
 WHAT TO IMPROVE:
 <!-- - ADD LOGGING THE EVALUATED CONFIGURATIONS -->
 - INCLUDE TAU ALONG XI
-- CHANGE FORM OF THA A MATRIX
-- CHANGE LOSS FUNCTION
+<!-- - CHANGE FORM OF THA A MATRIX -->
+<!-- - CHANGE LOSS FUNCTION -->
 - TRIM OUTLAYING PARAMETERS
 
 
@@ -85,3 +85,10 @@ how to handle batches of networks?
 where can we assess quality of estimation?
 - during the estimation process and generate a report along with the parameters
 - after the estimation process using the proximity evaluator
+
+
+loss: 0.00020 std_A': 0.01199 r:  {'r_0': 0.04505286023886657, 'r_1': 0.6121321471707063, 'r_2': 0.5948285738658033}
+
+loss: 0.02665 std_A': 0.01215 r:  {'r_0': 0.25061043646149356, 'r_1': 0.1473677367124492, 'r_2': 0.011286104130902254}
+loss: 0.03071 std_A': 0.01454 r:  {'r_0': 0.4681150470441948, 'r_1': 0.9547415365774085, 'r_2': 0.5557785348670855}
+loss: 0.02569 std_A': 0.00594 r:  {'r_0': 0.4037700398666927, 'r_1': 0.8737659376449, 'r_2': 0.5550648007225869}

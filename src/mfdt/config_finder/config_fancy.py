@@ -41,9 +41,19 @@ def get_comm_ami(net: nd.MultilayerNetwork, seed: int | None = None) -> np.ndarr
     return part_cor_df.to_numpy()
 
 
-def frobenius_norm(comm_ami: np.ndarray) -> float:
-    """Get Frobenius norm from the inter-layer community 'correlation' matrix."""
-    return np.linalg.norm(comm_ami, ord="fro").item()
+def frobenius_loss(A: np.ndarray, A_p: np.ndarray) -> float:
+    """Frobenius loss."""
+    fro_A = np.linalg.norm(A, ord="fro")
+    fro_A_p = np.linalg.norm(A_p, ord="fro")
+    return np.abs(fro_A_p - fro_A).item()
+
+
+def dummy_loss(A: np.ndarray, A_p: np.ndarray) -> float:
+    """Mean difference between A and A_p elements under the lower triangle."""
+    d_A = np.abs(A_p - A)
+    idcs = np.tril_indices(d_A.shape[0], k=-1)
+    d_a = d_A[idcs[0], idcs[1]]  # d_A vals from the lower triangle without the diagonal
+    return d_a.mean().item()
 
 
 def estimate_all_but_r(net: nd.MultilayerNetwork) -> tuple[dict[str, int], BaseMLNConfig]:
@@ -115,6 +125,7 @@ def prepare_objective(
     fixed_mabcd_params: BaseMLNConfig,
     A: np.ndarray,
     r_space: list[skopt.space.Real],
+    criterium: Callable,
     nb_twins: int = 5,
     rng_seed: int | None = None,
     out_dir: Path | None = None,
@@ -180,7 +191,7 @@ def prepare_objective(
         # average the sample, compute distance from the real network and return it as a loss
         std_A_primes = get_stacked_A_element_variance(A_primes)
         A_prime = np.mean(A_primes, axis=0)
-        loss = np.abs(frobenius_norm(A_prime) - frobenius_norm(A))
+        loss = criterium(A, A_prime)
         print("loss: %.5f" % loss, "std_A': %.5f" % std_A_primes, "r: ", r_dict)
         return loss
     
@@ -214,6 +225,8 @@ def estimate_config_fancy(
         fixed_mabcd_params,
         A,
         r_space,
+        # criterium=frobenius_loss,
+        criterium=dummy_loss,
         nb_twins=3,
         rng_seed=seed,
         out_dir=log_dir,
@@ -225,6 +238,11 @@ def estimate_config_fancy(
         noise="gaussian",
         random_state=seed,
         n_jobs=1,
+    )
+    print(
+        "[BEST SOLUTION] ",
+        "loss: %.5f" % result.fun,
+        "r: ", {r_space[i].name: result.x[i] for i in range(len(r_space))}
     )
     if log_dir:
         plot_optimisation_process(result, log_dir / "trajectory.png")
