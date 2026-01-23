@@ -39,9 +39,10 @@ finder:
     params:
       save_logs: True
       criterium: dummy
-      decision_variables: "TODO"
+      decision_variables: ["r", "tau"]
+      # decision_variables: ["r"]
       nb_twins: 5
-      nb_steps: 10
+      nb_steps: 20
       d_max_iter: 1000
       c_max_iter: 1000
       t: 100

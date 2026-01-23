@@ -1,7 +1,8 @@
 """Fancy methods for inferring mABCD configuration parameters."""
 
+import copy
 from pathlib import Path
-from typing import Any, Callable
+from typing import Callable
 
 import network_diffusion as nd
 import numpy as np
@@ -14,11 +15,14 @@ from mfdt.config_finder.basic_finder import (
     get_edges_cor,
     get_gamma_delta_Delta,
     get_q,
+    get_r,
     get_tau,
 )
 from mfdt.config_finder.ff_figures import plot_optimisation_process
 from mfdt.config_finder.ff_helpers import (
+    convert_result,
     get_comm_ami,
+    get_decision_space,
     get_stacked_A_element_variance,
     get_criterium,
     prepare_log_dir,
@@ -28,7 +32,12 @@ from mfdt.mln_abcd.julia_reader import load_edgelist
 from mfdt.mln_abcd.julia_wrapper import MLNABCDGraphGenerator, MLNConfig, BaseMLNConfig
 
 
-def estimate_all_but_r(net: nd.MultilayerNetwork) -> tuple[dict[str, int], BaseMLNConfig]:
+def estimate_fixed_params(
+    net: nd.MultilayerNetwork,
+    do_r: bool,
+    do_tau: bool,
+    seed: int | None = None,
+) -> tuple[dict[str, int], BaseMLNConfig]:
     """Estimate configuration for given network in the barbarian way."""
     l_map = {l_name: l_idx for l_idx, l_name in enumerate(sorted(net.layers), 1)}
     n = net.get_actors_num()
@@ -39,14 +48,22 @@ def estimate_all_but_r(net: nd.MultilayerNetwork) -> tuple[dict[str, int], BaseM
         q[l_name] = get_q(l_graph, n)
         gamma_delta_Delta[l_name] = get_gamma_delta_Delta(l_graph)
         beta_s_S_xi[l_name] = get_beta_s_S_xi(l_graph)
-
-    tau = get_tau(net, alpha=None)
+    
+    if do_r:
+        r = {l_name: None for l_name in net.layers}
+    else:
+        r = get_r(net=net, seed=seed)
+    
+    if do_tau:
+        tau = {l_name: None for l_name in net.layers}
+    else:
+        tau = get_tau(net, alpha=None)
 
     params_dict = {
         l_name: {
             **{"q": q[l_name]},
             **{"tau": tau[l_name]},
-            **{"r": None},
+            **{"r": r[l_name]},
             **gamma_delta_Delta[l_name],
             **beta_s_S_xi[l_name],
         }
@@ -59,14 +76,13 @@ def estimate_all_but_r(net: nd.MultilayerNetwork) -> tuple[dict[str, int], BaseM
     edges_cor = edges_cor.rename(l_map, axis=1)
     layers_par = layers_par.rename(l_map, axis=0)
     est_config = BaseMLNConfig(n=n, edges_cor=edges_cor, layer_params=layers_par)
-
     return l_map, est_config
 
 
 def prepare_objective(
     fixed_mabcd_params: BaseMLNConfig,
     A: np.ndarray,
-    r_space: list[skopt.space.Real],
+    decision_space: list[skopt.space.Real],
     criterium: Callable,
     nb_twins: int,
     d_max_iter: int,
@@ -96,15 +112,22 @@ def prepare_objective(
     seed_generator = np.random.default_rng(seed=rng_seed)
     out_dir_server = prepare_log_dir(out_dir)
 
-    @skopt.utils.use_named_args(dimensions=r_space)
-    def objective(**r_dict) -> float:
+    @skopt.utils.use_named_args(dimensions=decision_space)
+    def objective(**decision_vars) -> float:
 
         # prepare fully fledged candidate configuraiton to evaluate
-        candidate_config = fixed_dict.copy()
-        candidate_config["layer_params"]["r"] = [r_dict[f"r_{i}"] for i in range(len(A))]
+        candidate_config = copy.deepcopy(fixed_dict)
         candidate_config["seed"] = int(seed_generator.random() * 279)
         candidate_config["edges_filename"] = "eval_edges.dat"
         candidate_config["communities_filename"] = "eval_communities.dat"
+
+        # update evaluated values or r and tau depending on if the'yre fixed or decision vars
+        r_list = [decision_vars.get(f"r_{i}") for i in range(len(A))]
+        if None not in r_list:
+            candidate_config["layer_params"]["r"] = r_list
+        tau_list = [decision_vars.get(f"tau_{i}") for i in range(len(A))]
+        if None not in tau_list:
+            candidate_config["layer_params"]["tau"] = tau_list
 
         # repreat twinning process n times to reduce noise
         A_primes = []
@@ -139,7 +162,7 @@ def prepare_objective(
         std_A_primes = get_stacked_A_element_variance(A_primes)
         A_prime = np.mean(A_primes, axis=0)
         loss = criterium(A, A_prime)
-        print("loss: %.5f" % loss, "std_A': %.5f" % std_A_primes, "r: ", r_dict)
+        print("loss: %.5f" % loss, "std_A': %.5f" % std_A_primes, "dv: ", decision_vars)
         return loss
     
     return objective
@@ -150,7 +173,7 @@ def estimate_config_fancy(
     log_dir: Path,
     save_logs: bool,
     criterium: str,
-    decision_variables: Any,  # TODO: implement deision var choice
+    decision_variables: list[str],
     nb_twins: int,
     nb_steps: int,
     d_max_iter: int,
@@ -172,17 +195,19 @@ def estimate_config_fancy(
         - according to the distance update `r` and `tau`
     - preserve `r` and `tau` that preserves the smallest distance
     """
-    l_map, fixed_mabcd_params = estimate_all_but_r(net)
+    l_map, fixed_mabcd_params = estimate_fixed_params(
+        net=net,
+        do_r=True if "r" in decision_variables else False,
+        do_tau=True if "tau" in decision_variables else False,
+        seed=seed,
+    )
     A = get_comm_ami(net, seed)
-    r_space = [
-        skopt.space.Real(0.0, 1.0, name=f"r_{i}")
-        for i in range(A.shape[0])
-    ]
+    decision_space = get_decision_space(decision_variables, A.shape[0])
     criterium_func = get_criterium(criterium)
     objective = prepare_objective(
         fixed_mabcd_params=fixed_mabcd_params,
         A=A,
-        r_space=r_space,
+        decision_space=decision_space,
         criterium=criterium_func,
         nb_twins=nb_twins,
         d_max_iter=d_max_iter,
@@ -193,9 +218,10 @@ def estimate_config_fancy(
         rng_seed=seed,
         out_dir=log_dir if save_logs else None,
     )
+
     result = skopt.gp_minimize(
         func=objective,
-        dimensions=r_space,
+        dimensions=decision_space,
         n_calls=nb_steps,
         noise="gaussian",
         random_state=seed,
@@ -204,12 +230,19 @@ def estimate_config_fancy(
     print(
         "[BEST SOLUTION] ",
         "loss: %.5f" % result.fun,
-        "r: ", {r_space[i].name: result.x[i] for i in range(len(r_space))}
+        "dv: ", {dv.name: x for (dv, x) in zip(decision_space, result.x)}
     )
+
     if log_dir:
         plot_optimisation_process(result, log_dir / "trajectory.png")
         np.save(f"{log_dir}/A.npy", A)
         with open(f"{log_dir}/optim.txt", "w") as f:
             f.write(result.__str__())
-    fixed_mabcd_params.layer_params["r"] = result.x
+    
+    dv_opt = convert_result(decision_space, result)
+    if "r" in decision_variables:
+        fixed_mabcd_params.layer_params["r"] = dv_opt["r"]
+    if "tau" in decision_variables:
+        fixed_mabcd_params.layer_params["tau"] = dv_opt["tau"]
+
     return l_map, fixed_mabcd_params

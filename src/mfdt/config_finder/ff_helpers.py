@@ -6,6 +6,8 @@ from typing import Callable
 
 import network_diffusion as nd
 import numpy as np
+from skopt.space import Real
+from skopt.utils import OptimizeResult
 
 from mfdt.config_finder import correlations, cr_helpers
 from mfdt.params_handler import create_out_dir
@@ -34,6 +36,17 @@ def get_stacked_A_element_variance(stacked_A: np.ndarray) -> float:
     return vals.std(axis=0).mean().item()
 
 
+def get_decision_space(decision_variables: list[str], n_layers: int) -> list[Real]:
+    decision_space = []
+    if "r" in decision_variables:
+        r_space = [Real(0.0, 1.0, name=f"r_{i}") for i in range(n_layers)]
+        decision_space.extend(r_space)
+    if "tau" in decision_variables:
+        tau_space = [Real(0.0, 1.0, name=f"tau_{i}") for i in range(n_layers)]
+        decision_space.extend(tau_space)
+    return decision_space
+
+
 def frobenius_loss(A: np.ndarray, A_p: np.ndarray) -> float:
     """Frobenius loss."""
     fro_A = np.linalg.norm(A, ord="fro")
@@ -46,7 +59,7 @@ def dummy_loss(A: np.ndarray, A_p: np.ndarray) -> float:
     d_A = np.abs(A_p - A)
     idcs = np.tril_indices(d_A.shape[0], k=-1)
     d_a = d_A[idcs[0], idcs[1]]  # d_A vals from the lower triangle without the diagonal
-    return d_a.mean().item()
+    return 100 * d_a.mean().item()
 
 
 def get_criterium(name: str) -> Callable:
@@ -78,3 +91,19 @@ def prepare_log_dir(out_dir: Path | None = None) -> Callable:
         # def mock_tmpdir():
         #     yield str(create_out_dir(out_dir))
     return tempfile.TemporaryDirectory
+
+
+def convert_result(decision_space: list[Real], result: OptimizeResult) -> dict[str, list[float]]:
+    """Split optimised values into lists consumable by the mABCD config dict."""
+    res_dict = {dv.name: x for (dv, x) in zip(decision_space, result.x)}
+    r, tau = {}, {}
+    for k, v in res_dict.items():
+        if k.startswith("r_"):
+            idx = int(k.split("_")[1])
+            r[idx] = v
+        elif k.startswith("tau_"):
+            idx = int(k.split("_")[1])
+            tau[idx] = v
+    r_list = [r[i] for i in sorted(r)]
+    tau_list = [tau[i] for i in sorted(tau)]
+    return {"r": r_list, "tau": tau_list}

@@ -74,10 +74,11 @@ colleagues from https://github.com/neptune-ai/neptune-exporter
 
 WHAT TO IMPROVE:
 <!-- - ADD LOGGING THE EVALUATED CONFIGURATIONS -->
-- INCLUDE TAU ALONG XI
+<!-- - INCLUDE TAU ALONG XI -->
 <!-- - CHANGE FORM OF THA A MATRIX -->
 <!-- - CHANGE LOSS FUNCTION -->
 - TRIM OUTLAYING PARAMETERS
+- TEST ON THE MABCD NETWORK
 
 
 improve estimating r
