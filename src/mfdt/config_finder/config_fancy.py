@@ -1,7 +1,6 @@
 """Fancy methods for inferring mABCD configuration parameters."""
 
 import tempfile
-from contextlib import contextmanager
 from pathlib import Path
 from typing import Callable
 
@@ -28,7 +27,7 @@ from mfdt.params_handler import create_out_dir
 
 def get_comm_ami(net: nd.MultilayerNetwork, seed: int | None = None) -> np.ndarray:
     """Get interlatyer 'correlations' (i.e. AMI) between partitions."""
-    net = net.to_multiplex()[0]
+    # net = net.to_multiplex()[0]  # TODO: decide if we need that?
     part_cor_raw = []
     for la_name, lb_name in helpers.prepare_layer_pairs(list(net.layers.keys())):
         aligned_layers = helpers.align_layers(net, la_name, lb_name, "destructive")
@@ -105,6 +104,13 @@ def prepare_log_dir(out_dir: Path | None = None):
     return tempfile.TemporaryDirectory
 
 
+def get_stacked_A_element_variance(stacked_A: np.ndarray) -> float:
+    n_samples, n_dims, _ = stacked_A.shape  # n_dims == _
+    idx = np.tril_indices(n_dims, k=-1)
+    vals = stacked_A[:, idx[0], idx[1]]
+    return vals.std(axis=0).mean().item()
+
+
 def prepare_objective(
     fixed_mabcd_params: BaseMLNConfig,
     A: np.ndarray,
@@ -167,10 +173,15 @@ def prepare_objective(
                 A_prime_n = get_comm_ami(net=twin, seed=rng_seed)
                 A_primes.append(A_prime_n)
 
+            # save computed A matrices in the sample
+            A_primes = np.array(A_primes)
+            np.save(f"{tmpdir}/A_primes.npy", A_primes)
+        
         # average the sample, compute distance from the real network and return it as a loss
+        std_A_primes = get_stacked_A_element_variance(A_primes)
         A_prime = np.mean(A_primes, axis=0)
         loss = np.abs(frobenius_norm(A_prime) - frobenius_norm(A))
-        print(loss, r_dict)
+        print("loss: %.5f" % loss, "std_A': %.5f" % std_A_primes, "r: ", r_dict)
         return loss
     
     return objective
@@ -203,7 +214,7 @@ def estimate_config_fancy(
         fixed_mabcd_params,
         A,
         r_space,
-        nb_twins=2,
+        nb_twins=3,
         rng_seed=seed,
         out_dir=log_dir,
     )
@@ -213,9 +224,12 @@ def estimate_config_fancy(
         n_calls=10,
         noise="gaussian",
         random_state=seed,
-        n_jobs=5,
+        n_jobs=1,
     )
     if log_dir:
         plot_optimisation_process(result, log_dir / "trajectory.png")
+        np.save(f"{log_dir}/A.npy", A)
+        with open(f"{log_dir}/optim.txt", "w") as f:
+            f.write(result.__str__())
     fixed_mabcd_params.layer_params["r"] = result.x
     return l_map, fixed_mabcd_params

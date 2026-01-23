@@ -15,11 +15,12 @@ from skopt.utils import OptimizeResult
 def _plot_trajectory(ax: Axes, result: OptimizeResult) -> Axes:
     plot_convergence(("gp_min", result), ax=ax)
     ax.plot(
+        np.arange(start=1, stop=len(result.func_vals)+1, step=1),
         result.func_vals,
         linestyle="--",
         linewidth=1.5,
         alpha=0.4,
-        label="curr trajectory",
+        label="gp_curr",
     )
     ax.legend()
     ax.set_title("Covergence plot")
@@ -98,7 +99,7 @@ def _plot_mesh(ax: Axes, result: "OptimizeResult") -> Axes:
 
 def plot_optimisation_process(result: OptimizeResult, out_dir: Path) -> None:
     """Plot the optimisation process for a skopt result."""
-    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(9, 6))
+    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(9, 4))
     fig.suptitle("Optimisation Results")
     ax[0] = _plot_trajectory(ax[0], result)
     ax[1] = _plot_mesh(ax[1], result)
