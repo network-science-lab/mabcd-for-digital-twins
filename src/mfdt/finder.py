@@ -10,8 +10,8 @@ from tqdm import tqdm
 
 from mfdt.params_handler import Network, load_networks, create_out_dir
 from mfdt.mln_abcd.julia_wrapper import MLNABCDGraphGenerator, MLNConfig, BaseMLNConfig
-from mfdt.config_finder.config_model import estimate_config_rudimentarly
-from mfdt.config_finder.config_fancy import estimate_config_fancy
+from mfdt.config_finder.basic_finder import estimate_config_rudimentarly
+from mfdt.config_finder.fancy_finder import estimate_config_fancy
 
 
 def estimate_config(

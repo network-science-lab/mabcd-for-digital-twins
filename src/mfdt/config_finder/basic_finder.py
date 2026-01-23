@@ -10,7 +10,7 @@ import pandas as pd
 import powerlaw
 from scipy.stats import kendalltau
 
-from mfdt.config_finder import correlations, helpers
+from mfdt.config_finder import correlations, cr_helpers
 from mfdt.mln_abcd.julia_wrapper import BaseMLNConfig
 
 
@@ -31,7 +31,7 @@ def get_tau(net: nd.MultilayerNetwork, alpha: float | None = 0.05) -> dict[str, 
     net = net.to_multiplex()[0]
     layer_names = sorted(list(net.layers))
 
-    degree_sequence  = helpers.get_degree_sequence(net).T
+    degree_sequence  = cr_helpers.get_degree_sequence(net).T
     degree_sequence = degree_sequence.sort_index().sort_values(by=layer_names[0], ascending=False)
     actors_map = {id: idx for idx, id in enumerate(list(degree_sequence.index)[::-1])}
     degree_sequence = degree_sequence.rename(index=actors_map)
@@ -126,11 +126,11 @@ def get_beta_s_S_xi(net: nx.Graph) -> dict[str, float]:
 def get_edges_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
     """Get correlation matrix for edges."""
     edges_cor_raw = []
-    for la_name, lb_name in helpers.prepare_layer_pairs(list(net.layers.keys())):
-        aligned_layers = helpers.align_layers(net, la_name, lb_name, "destructive")
+    for la_name, lb_name in cr_helpers.prepare_layer_pairs(list(net.layers.keys())):
+        aligned_layers = cr_helpers.align_layers(net, la_name, lb_name, "destructive")
         edges_stat = correlations.edges_r(aligned_layers[la_name], aligned_layers[lb_name])
         edges_cor_raw.append({(la_name, lb_name): edges_stat})
-    edges_cor_df = helpers.create_correlation_matrix(edges_cor_raw)
+    edges_cor_df = cr_helpers.create_correlation_matrix(edges_cor_raw)
     return edges_cor_df.round(3).fillna(0.0)
 
 
