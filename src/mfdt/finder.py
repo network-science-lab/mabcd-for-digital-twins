@@ -21,15 +21,17 @@ def estimate_config(
     rng_seed: int,
 ) -> None:
     """Estimate configuration for given network and save it as a yaml file."""
+    out_dir = create_out_dir(target_dir / network.n_type)
     if method == "rudimentary":
         l_map, est_config = estimate_config_rudimentarly(net=network.n_graph_nx, seed=rng_seed)
     elif method == "fancy":
-        l_map, est_config = estimate_config_fancy(net=network.n_graph_nx, seed=rng_seed)
+        l_map, est_config = estimate_config_fancy(
+            net=network.n_graph_nx, seed=rng_seed, log_dir=out_dir / "logs"
+        )
     else:
         raise ValueError("Unknown estimation method!")
 
     # save estimated config
-    out_dir = create_out_dir(target_dir / network.n_type)
     json.dump(l_map, open(out_dir / f"{network.n_name}_lmap.json", "w", encoding="utf-8"))
     with open(out_dir / f"{network.n_name}_config.yaml", "w", encoding="utf-8") as f:
         yaml.dump(est_config.to_yaml(), f, sort_keys=False, indent=4)

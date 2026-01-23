@@ -26,8 +26,8 @@ networks: [
     # "smallart^er5",
     # "smallart^sf1",
     # "smallart^sf2",
-    # "smallart^sf3",
-    "smallart^sf5",
+    "smallart^sf3",
+    # "smallart^sf5",
   ]
 
 finder:

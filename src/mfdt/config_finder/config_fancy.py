@@ -1,6 +1,7 @@
 """Fancy methods for inferring mABCD configuration parameters."""
 
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Callable
 
@@ -8,6 +9,7 @@ import network_diffusion as nd
 import numpy as np
 import pandas as pd
 import skopt
+import yaml
 
 from mfdt.config_finder import correlations, helpers
 from mfdt.config_finder.config_model import (
@@ -21,6 +23,7 @@ from mfdt.config_finder.figures import plot_optimisation_process
 from mfdt.loaders.net_loader import _prepare_network
 from mfdt.mln_abcd.julia_reader import load_edgelist
 from mfdt.mln_abcd.julia_wrapper import MLNABCDGraphGenerator, MLNConfig, BaseMLNConfig
+from mfdt.params_handler import create_out_dir
 
 
 def get_comm_ami(net: nd.MultilayerNetwork, seed: int | None = None) -> np.ndarray:
@@ -79,12 +82,36 @@ def estimate_all_but_r(net: nd.MultilayerNetwork) -> tuple[dict[str, int], BaseM
     return l_map, est_config
 
 
+def prepare_log_dir(out_dir: Path | None = None):
+    """Prepare directory to store logs in if out_dir provided."""
+    if out_dir:
+        class OutDirServer:
+            """Mock for TemporaryDirectory to store logs in a reachable dir."""
+            def __init__(self, out_dir: Path) -> None:
+                self.out_dir_base = out_dir
+                self.call_nb = 0
+            def __call__(self) -> "OutDirServer":
+                return self
+            def __enter__(self, *args, **kwargs) -> str:
+                curr = self.out_dir_base / str(self.call_nb)
+                self.call_nb += 1
+                return str(create_out_dir(curr))
+            def __exit__(self, *args, **kwargs) -> bool:
+                return False
+        return OutDirServer(out_dir)
+        # @contextmanager
+        # def mock_tmpdir():
+        #     yield str(create_out_dir(out_dir))
+    return tempfile.TemporaryDirectory
+
+
 def prepare_objective(
     fixed_mabcd_params: BaseMLNConfig,
     A: np.ndarray,
     r_space: list[skopt.space.Real],
     nb_twins: int = 5,
     rng_seed: int | None = None,
+    out_dir: Path | None = None,
 ) -> Callable:
     """
     Prepare the objective function to estimate r for given real network.
@@ -103,6 +130,7 @@ def prepare_objective(
     fixed_dict["eps"] = 0.05
     fixed_dict["d"] = 2
     seed_generator = np.random.default_rng(seed=rng_seed)
+    out_dir_server = prepare_log_dir(out_dir)
 
     @skopt.utils.use_named_args(dimensions=r_space)
     def objective(**r_dict) -> float:
@@ -111,22 +139,33 @@ def prepare_objective(
         candidate_config = fixed_dict.copy()
         candidate_config["layer_params"]["r"] = [r_dict[f"r_{i}"] for i in range(len(A))]
         candidate_config["seed"] = int(seed_generator.random() * 279)
+        candidate_config["edges_filename"] = "eval_edges.dat"
+        candidate_config["communities_filename"] = "eval_communities.dat"
 
         # repreat twinning process n times to reduce noise
         A_primes = []
-        for _ in range(nb_twins):
+        with out_dir_server() as tmpdir:
 
-            # create a twin network (no short way to get rid of this tempdir)
-            with tempfile.TemporaryDirectory() as tmpdir:
-                fixed_dict["edges_filename"] = str(Path(tmpdir) / "_edges.dat")
-                fixed_dict["communities_filename"] = str(Path(tmpdir) / "_communities.dat")
-                mln_config = MLNConfig.from_yaml(fixed_dict)
+            # create config according to the twin will be generated
+            mln_config = MLNConfig.from_yaml(candidate_config)
+            with open(f"{tmpdir}/eval_config.yaml", "w", encoding="utf-8") as f:
+                yaml.dump(mln_config.to_yaml(), f, sort_keys=False, indent=4)
+
+            for rep in range(nb_twins):
+
+                # replace out paths according to sample number
+                rep_ef = Path(tmpdir) / f"{rep}_{candidate_config['edges_filename']}"
+                rep_cf = Path(tmpdir) / f"{rep}_{candidate_config['communities_filename']}"
+                mln_config.edges_filename = str(rep_ef)
+                mln_config.communities_filename = str(rep_cf)
+
+                # generate the network
                 MLNABCDGraphGenerator()(config=mln_config)
-                twin = _prepare_network(load_edgelist(Path(tmpdir) / "_edges.dat"))
+                twin = _prepare_network(load_edgelist(rep_ef))
 
-            # compute correlation matrix and append it to the sample
-            A_prime_n = get_comm_ami(net=twin, seed=rng_seed)
-            A_primes.append(A_prime_n)
+                # compute correlation matrix and append it to the sample
+                A_prime_n = get_comm_ami(net=twin, seed=rng_seed)
+                A_primes.append(A_prime_n)
 
         # average the sample, compute distance from the real network and return it as a loss
         A_prime = np.mean(A_primes, axis=0)
@@ -140,6 +179,7 @@ def prepare_objective(
 def estimate_config_fancy(
     net: nd.MultilayerNetwork,
     seed: int | None = None,
+    log_dir: Path | None = None,
 ) -> tuple[dict[str, int], BaseMLNConfig]:
     """
     Estimate configuration for given network using optimisation mechanisms.
@@ -159,15 +199,23 @@ def estimate_config_fancy(
         skopt.space.Real(0.0, 1.0, name=f"r_{i}")
         for i in range(A.shape[0])
     ]
-    objective = prepare_objective(fixed_mabcd_params, A, r_space, rng_seed=seed)
+    objective = prepare_objective(
+        fixed_mabcd_params,
+        A,
+        r_space,
+        nb_twins=2,
+        rng_seed=seed,
+        out_dir=log_dir,
+    )
     result = skopt.gp_minimize(
         func=objective,
         dimensions=r_space,
-        n_calls=20,
+        n_calls=10,
         noise="gaussian",
         random_state=seed,
         n_jobs=5,
     )
-    plot_optimisation_process(result, Path("optim_2.png"))
+    if log_dir:
+        plot_optimisation_process(result, log_dir / "trajectory.png")
     fixed_mabcd_params.layer_params["r"] = result.x
     return l_map, fixed_mabcd_params
