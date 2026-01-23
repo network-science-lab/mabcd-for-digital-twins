@@ -71,6 +71,14 @@ This work was supported by the...
 As for uv, I'm still learning it, so some parts may be not optimal. I'm trying to follow our
 colleagues from https://github.com/neptune-ai/neptune-exporter
 
+
+WHAT TO IMPROVE:
+- ADD LOGGING THE EVALUATED CONFIGURATIONS
+- INCLUDE TAU ALONG XI
+- CHANGE FORM OF THA A MATRIX
+- CHANGE LOSS FUNCTION
+
+
 improve estimating r
 how to handle batches of networks?
 where can we assess quality of estimation?
