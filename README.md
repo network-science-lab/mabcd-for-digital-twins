@@ -77,13 +77,6 @@ WHAT TO IMPROVE:
 <!-- - INCLUDE TAU ALONG XI -->
 <!-- - CHANGE FORM OF THA A MATRIX -->
 <!-- - CHANGE LOSS FUNCTION -->
-- TRIM OUTLAYING PARAMETERS
+<!-- - TRIM OUTLAYING PARAMETERS -->
 - TEST ON THE MABCD NETWORK
-
-
-improve estimating r
-how to handle batches of networks?
-where can we assess quality of estimation?
-- during the estimation process and generate a report along with the parameters
-- after the estimation process using the proximity evaluator
-
+- ASSESS QUALITY OF ESTIMATION

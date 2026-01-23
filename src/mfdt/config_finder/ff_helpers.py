@@ -6,11 +6,69 @@ from typing import Callable
 
 import network_diffusion as nd
 import numpy as np
+import pandas as pd
 from skopt.space import Real
 from skopt.utils import OptimizeResult
 
+from mfdt.config_finder.basic_finder import (
+    get_beta_s_S_xi,
+    get_edges_cor,
+    get_gamma_delta_Delta,
+    get_q,
+    get_r,
+    get_tau,
+)
 from mfdt.config_finder import correlations, cr_helpers
 from mfdt.params_handler import create_out_dir
+from mfdt.mln_abcd.julia_wrapper import BaseMLNConfig
+
+
+def estimate_fixed_params(
+    net: nd.MultilayerNetwork,
+    do_r: bool,
+    do_tau: bool,
+    cap_fixed_params: bool,
+    seed: int | None = None,
+) -> tuple[dict[str, int], BaseMLNConfig]:
+    """Estimate fixed parameters of the network that will not be searched with skopt."""
+    l_map = {l_name: l_idx for l_idx, l_name in enumerate(sorted(net.layers), 1)}
+    n = net.get_actors_num()
+    edges_cor = get_edges_cor(net=net)
+
+    q, gamma_delta_Delta, beta_s_S_xi = {}, {}, {}
+    for l_name, l_graph in net.layers.items():
+        q[l_name] = get_q(l_graph, n)
+        gamma_delta_Delta[l_name] = get_gamma_delta_Delta(l_graph, cap_fixed_params)
+        beta_s_S_xi[l_name] = get_beta_s_S_xi(l_graph, cap_fixed_params)
+    
+    if do_r:
+        r = {l_name: None for l_name in net.layers}
+    else:
+        r = get_r(net=net, seed=seed)
+    
+    if do_tau:
+        tau = {l_name: None for l_name in net.layers}
+    else:
+        tau = get_tau(net, alpha=None)
+
+    params_dict = {
+        l_name: {
+            **{"q": q[l_name]},
+            **{"tau": tau[l_name]},
+            **{"r": r[l_name]},
+            **gamma_delta_Delta[l_name],
+            **beta_s_S_xi[l_name],
+        }
+        for l_name in net.layers
+    }
+    params_df = pd.DataFrame(params_dict).T.sort_index()
+    layers_par = params_df.round(3).replace(0.0, 0.001)
+
+    edges_cor = edges_cor.rename(l_map, axis=0)
+    edges_cor = edges_cor.rename(l_map, axis=1)
+    layers_par = layers_par.rename(l_map, axis=0)
+    est_config = BaseMLNConfig(n=n, edges_cor=edges_cor, layer_params=layers_par)
+    return l_map, est_config
 
 
 def get_comm_ami(net: nd.MultilayerNetwork, seed: int | None = None) -> np.ndarray:
@@ -30,6 +88,7 @@ def get_comm_ami(net: nd.MultilayerNetwork, seed: int | None = None) -> np.ndarr
 
 
 def get_stacked_A_element_variance(stacked_A: np.ndarray) -> float:
+    """This variance measures stability of generated mABCD twins (the lower the better)."""
     n_samples, n_dims, _ = stacked_A.shape  # n_dims == _
     idx = np.tril_indices(n_dims, k=-1)
     vals = stacked_A[:, idx[0], idx[1]]

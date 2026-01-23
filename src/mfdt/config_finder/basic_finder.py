@@ -82,11 +82,11 @@ def _fit_exponent_powerlaw(raw_data: list[int] | list[float]) -> float:
     return results.alpha
 
 
-def get_gamma_delta_Delta(net: nx.Graph) -> dict[str, float]:
+def get_gamma_delta_Delta(net: nx.Graph, cap_estimates: bool = False) -> dict[str, float]:
     """Get powerlaw exponent and min/max degree for a given layer."""
     degrees = [d for _, d in net.degree()]
     max_degree = max(degrees)
-    min_degree = min(degrees)
+    min_degree = min(degrees) if not cap_estimates else max(min(degrees), 5)
     return {
         "gamma": _fit_exponent_powerlaw(degrees),
         "delta": min_degree / len(net.nodes),
@@ -110,14 +110,15 @@ def _avg_partitions_noise(
     return (all_edges - internal_edges) / all_edges
 
 
-def get_beta_s_S_xi(net: nx.Graph) -> dict[str, float]:
+def get_beta_s_S_xi(net: nx.Graph, cap_estimates: bool = False) -> dict[str, float]:
     """Get powerlaw exponent and min/max community size for a given layer."""
     # partitions = nx.community.louvain_communities(net)
     partitions = nx.community.greedy_modularity_communities(net)
     partitions_sizes = [len(part) for part in partitions]
+    min_ps = min(partitions_sizes) if not cap_estimates else max(min(partitions_sizes), 30)
     return {
         "beta": _fit_exponent_powerlaw(partitions_sizes),
-        "s": min(partitions_sizes) / len(net.nodes),
+        "s": min_ps / len(net.nodes),
         "S": max(partitions_sizes) / len(net.nodes),
         "xi": _avg_partitions_noise(net, partitions),
     }
