@@ -65,15 +65,9 @@ def _plot_mesh(ax: Axes, result: "OptimizeResult") -> Axes:
     ax.figure.colorbar(mesh, ax=ax, label="loss")
 
     # Plot sampled points
-    ax.scatter(
-        r_2d[:, 0],
-        r_2d[:, 1],
-        c=result.func_vals,
-        cmap="viridis",
-        edgecolor="k",
-        s=40,
-        zorder=3,
-    )
+    ax.scatter(r_2d[1:-1, 0], r_2d[1:-1, 1], c="black", s=50, zorder=3)
+    ax.scatter(r_2d[0, 0], r_2d[0, 1], color="blue", edgecolor="black", s=50, zorder=4)
+    ax.scatter(r_2d[-1, 0], r_2d[-1, 1], color="yellow", edgecolor="black", s=50, zorder=4)
 
     # Plot optimisation trajectory arrows
     dx = r_2d[1:, 0] - r_2d[:-1, 0]
@@ -86,14 +80,14 @@ def _plot_mesh(ax: Axes, result: "OptimizeResult") -> Axes:
         angles="xy",
         scale_units="xy",
         scale=1,
-        width=0.01,
+        width=0.007,
         color="white",
         zorder=4,
     )
 
     ax.set_xlabel("PC1")
     ax.set_ylabel("PC2")
-    ax.set_title("Loss landscape (PCA, coarse interpolation)")
+    ax.set_title("Loss landscape & trajectory")
     return ax
 
 
