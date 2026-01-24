@@ -10,7 +10,7 @@ networks: [
     # "bigreal^cannes",  # TODO: compute it on the server - it's too heavy
     # "bigreal^timik1q2009",
     # "bigreal^Freebase",
-    "smallreal^aucs",
+    # "smallreal^aucs",  # TO SMALL!!!
     # "smallreal^ckm_physicians",
     # "smallreal^eu_transportation",  # TODO: too big errors for this network!
     # "smallreal^eu_transport_klm",
@@ -25,10 +25,27 @@ networks: [
     # "smallart^er3",
     # "smallart^er5",
     # "smallart^sf1",
-    "smallart^sf2",
-    # "smallart^sf3",
+    # "smallart^sf2",
+    "smallart^sf3",
     # "smallart^sf5",
   ]
 
 finder:
   out_dir: "./examples/find"
+  # method: 
+  #   name: "rudimentary"
+  method: 
+    name: "fancy"
+    params:
+      save_logs: True
+      criterium: dummy
+      decision_variables: ["r", "tau"]
+      # decision_variables: ["r"]
+      cap_fixed_params: True  # False is faster
+      nb_twins: 5
+      nb_steps: 20
+      d_max_iter: 1000
+      c_max_iter: 1000
+      t: 100
+      eps: 0.05
+      d: 2

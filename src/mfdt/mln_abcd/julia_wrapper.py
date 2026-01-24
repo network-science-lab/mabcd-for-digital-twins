@@ -51,7 +51,7 @@ class MLNConfig(BaseMLNConfig):
     are normalized while others are not. If an object of this class is used along with
     MLNABCDGraphGenerator, it implicitly converts its parameters to meet Julia's format and ranges.
     """
-    seed: int
+    seed: int | None
     n: int
     edges_cor: pd.DataFrame
     layer_params: pd.DataFrame
@@ -66,7 +66,6 @@ class MLNConfig(BaseMLNConfig):
     def __post_init__(self) -> None:
         # TODO: consider adding validation with pydantic
         self._rng = np.random.default_rng(seed=self.seed)
-        assert isinstance(self.seed, int)
         assert isinstance(self.n, int)
         assert isinstance(self.edges_cor, pd.DataFrame)
         assert isinstance(self.layer_params, pd.DataFrame)
@@ -168,7 +167,11 @@ class MLNABCDGraphGenerator:
         except JuliaError:
             self.install_julia_dependencies()
             jl.seval("using MLNABCDGraphGenerator")
-        
+
+        # disable prints as they're so annoying
+        oldstdout = jl.stdout
+        jl.redirect_stdout(jl.devnull)
+                
         with tempfile.TemporaryDirectory() as tmpdir:
 
             # Save dataframes into temp dir
@@ -223,6 +226,9 @@ class MLNABCDGraphGenerator:
 
             # Save communities to file
             jl.MLNABCDGraphGenerator.write_communities(config, coms)
+    
+        # enable the output again
+        jl.redirect_stdout(oldstdout)
 
 
 if __name__ == "__main__":

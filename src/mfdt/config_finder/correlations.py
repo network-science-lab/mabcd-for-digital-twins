@@ -8,15 +8,22 @@ from sklearn.metrics import adjusted_mutual_info_score
 def partitions_correlation(
     graph_1: nx.Graph, 
     graph_2: nx.Graph,
-    graph_1_partitions: list[set[Any]] | None = None,
-    graph_2_partitions: list[set[Any]] | None = None,
+    graph_1_partitions: list[set[Any]] | list[frozenset[Any]] | None = None,
+    graph_2_partitions: list[set[Any]] | list[frozenset[Any]] | None = None,
     seed: int | None = 42,
 ) -> float:
+    """Get AMI of communities detected for two graphs spanned on the same set of vertices."""
+    if set(graph_1.nodes) != set(graph_2.nodes):
+        raise ValueError("Graphs must have identical node sets.")
+
     # obtain partitions in each graph
     if not graph_1_partitions:
-        graph_1_partitions = nx.community.louvain_communities(graph_1, seed=seed)
+        # graph_1_partitions = nx.community.louvain_communities(graph_1, seed=seed)
+        graph_1_partitions = nx.community.greedy_modularity_communities(graph_1)
+
     if not graph_2_partitions:
-        graph_2_partitions = nx.community.louvain_communities(graph_2, seed=seed)
+        # graph_2_partitions = nx.community.louvain_communities(graph_2, seed=seed)
+        graph_2_partitions = nx.community.greedy_modularity_communities(graph_2)
 
     # create dict keyed by nodes' ids, valued by array with partitions they're assigned into
     nodes_partitions = {node: [] for node in graph_1.nodes}

@@ -25,7 +25,7 @@ This repository is a complementary artifact for the [paper]().
 1. Install [uv](https://uv.run/) as the project is built with it.
 2. Install the project dependencies:
    ```bash
-   uv install .
+   uv sync
    ```
 3. Additionally, to use DVC with Google Drive as remote storage, install:
    ```bash
@@ -71,8 +71,12 @@ This work was supported by the...
 As for uv, I'm still learning it, so some parts may be not optimal. I'm trying to follow our
 colleagues from https://github.com/neptune-ai/neptune-exporter
 
-improve estimating r
-how to handle batches of networks?
-where can we assess quality of estimation?
-- during the estimation process and generate a report along with the parameters
-- after the estimation process using the proximity evaluator
+
+WHAT TO IMPROVE:
+<!-- - ADD LOGGING THE EVALUATED CONFIGURATIONS -->
+<!-- - INCLUDE TAU ALONG XI -->
+<!-- - CHANGE FORM OF THA A MATRIX -->
+<!-- - CHANGE LOSS FUNCTION -->
+<!-- - TRIM OUTLAYING PARAMETERS -->
+- TEST ON THE MABCD NETWORK
+- ASSESS QUALITY OF ESTIMATION

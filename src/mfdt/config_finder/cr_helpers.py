@@ -56,7 +56,8 @@ def get_degree_sequence(net: nd.MultilayerNetwork) -> pd.DataFrame:
 
 
 def prepare_layer_pairs(entities: list[str]) -> list[tuple[str, str]]:
-    return list(combinations(entities, 2))
+    # return list(combinations(entities, 2))
+    return [*combinations(entities, 2), *[(a, a) for a in entities]]  # TODO: can be done faster
 
 
 def _get_col_names(raw_statistics: list[dict[tuple[str, str], float]]) -> list[str]:
@@ -77,6 +78,6 @@ def create_correlation_matrix(raw_statistics: list[dict[tuple[str, str], float]]
         for (la_name, lb_name), statistic in record.items():
             matrix.loc[la_name, lb_name] = statistic
             matrix.loc[lb_name, la_name] = statistic
-    for l_name in col_names:
-        matrix.loc[l_name, l_name] = 1.0
+    # for l_name in col_names:
+    #     matrix.loc[l_name, l_name] = 1.0
     return matrix

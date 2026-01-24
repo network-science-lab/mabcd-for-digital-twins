@@ -1,6 +1,6 @@
 [project]
 name = "mfdt"
-version = "0.2.2"
+version = "0.3.0"
 description = "mABCD for Digital Twins (mfdt)"
 readme = "README.md"
 authors = [
@@ -19,6 +19,7 @@ dependencies = [
     "powerlaw>=2.0.0",
     "pyyaml>=6.0.3",
     "scikit-learn>=1.8.0",
+    "scikit-optimize>=0.10.2",
     "tqdm>=4.66.6",
 ]
 
