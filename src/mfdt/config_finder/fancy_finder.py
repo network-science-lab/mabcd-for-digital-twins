@@ -183,7 +183,7 @@ def estimate_config_fancy(
     if log_dir:
         plot_optimisation_process(result, log_dir / "trajectory.png")
         np.save(f"{log_dir}/A.npy", A)
-        with open(f"{log_dir}/optim.txt", "w") as f:
+        with open(f"{log_dir}/optim.txt", "w", encoding="utf-8") as f:
             f.write(result.__str__())
     
     dv_opt = convert_result(decision_space, result)

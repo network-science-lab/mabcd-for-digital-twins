@@ -25,7 +25,7 @@ This repository is a complementary artifact for the [paper]().
 1. Install [uv](https://uv.run/) as the project is built with it.
 2. Install the project dependencies:
    ```bash
-   uv install .
+   uv sync
    ```
 3. Additionally, to use DVC with Google Drive as remote storage, install:
    ```bash
