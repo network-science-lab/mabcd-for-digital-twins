@@ -78,7 +78,13 @@ def get_r(net: nd.MultilayerNetwork, seed: int | None = None) -> dict[str, float
 
 
 def _fit_exponent_powerlaw(raw_data: list[int] | list[float]) -> float:
-    results = powerlaw.Fit(raw_data, discrete=True, verbose=False)
+    results = powerlaw.Fit(
+        data=raw_data,
+        discrete=True,
+        verbose=False,
+        # fit_method="KS",  # uncomment to use Kolmogorov-Smirnov test
+        xmin_distribution="power_law",
+    )
     return results.alpha
 
 
