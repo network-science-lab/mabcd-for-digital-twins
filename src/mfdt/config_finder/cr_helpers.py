@@ -1,6 +1,6 @@
 from copy import deepcopy
 from itertools import combinations
-from typing import Literal
+from typing import Any, Literal
 
 import networkx as nx
 import network_diffusion as nd
@@ -53,6 +53,13 @@ def get_degree_sequence(net: nd.MultilayerNetwork) -> pd.DataFrame:
     for l_name, l_graph in net.layers.items():
         net_degrees[l_name] = dict(l_graph.degree())
     return pd.DataFrame(net_degrees).T
+
+
+def get_communities(net: nx.Graph, seed: int | None = 42) -> list[set[Any]] | list[frozenset[Any]]:
+    """A unified method for communities retrieval; use this in the repo for coherence."""
+    # partitions = nx.community.louvain_communities(net, seed=seed)
+    partitions = nx.community.greedy_modularity_communities(net)
+    return partitions
 
 
 def prepare_layer_pairs(entities: list[str]) -> list[tuple[str, str]]:
