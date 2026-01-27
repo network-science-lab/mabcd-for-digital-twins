@@ -1,8 +1,9 @@
 from typing import Any
 
 import networkx as nx
-
 from sklearn.metrics import adjusted_mutual_info_score
+
+from mfdt.config_finder.cr_helpers import get_communities
 
 
 def partitions_correlation(
@@ -18,12 +19,10 @@ def partitions_correlation(
 
     # obtain partitions in each graph
     if not graph_1_partitions:
-        # graph_1_partitions = nx.community.louvain_communities(graph_1, seed=seed)
-        graph_1_partitions = nx.community.greedy_modularity_communities(graph_1)
+        graph_1_partitions = get_communities(graph_1, seed)
 
     if not graph_2_partitions:
-        # graph_2_partitions = nx.community.louvain_communities(graph_2, seed=seed)
-        graph_2_partitions = nx.community.greedy_modularity_communities(graph_2)
+        graph_2_partitions = get_communities(graph_2, seed)
 
     # create dict keyed by nodes' ids, valued by array with partitions they're assigned into
     nodes_partitions = {node: [] for node in graph_1.nodes}

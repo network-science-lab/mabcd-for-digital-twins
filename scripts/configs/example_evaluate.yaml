@@ -1,0 +1,21 @@
+run:
+  experiment_type: "evaluate"
+  rng_seed: 43
+
+original_network: "smallart^sf3"
+layer_map: "./examples/find/smallart/sf3/lmap.json"
+twin_networks: [
+  "mabcd^./examples/find/smallart/sf3/logs/8/*",
+  # "mabcd^./examples/find/smallart/sf3/logs/9/0_eval_edges.dat",
+]
+
+evaluator:
+  out_dir: "./examples/evaluate"
+  divergencies: [
+    "R",
+    "tau",
+    "r",
+    "gamma",
+    "beta",
+    "xi",
+  ]

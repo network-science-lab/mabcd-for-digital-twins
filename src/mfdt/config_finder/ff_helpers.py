@@ -136,7 +136,7 @@ def prepare_log_dir(out_dir: Path | None = None) -> Callable:
             """Mock for TemporaryDirectory to store logs in a reachable dir."""
             def __init__(self, out_dir: Path) -> None:
                 self.out_dir_base = out_dir
-                self.call_nb = 0
+                self.call_nb = 1
             def __call__(self) -> "OutDirServer":
                 return self
             def __enter__(self, *args, **kwargs) -> str:

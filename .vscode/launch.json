@@ -15,6 +15,7 @@
       "justMyCode": false,
       "args": [
         "scripts/configs/example_find.yaml"
+        // "scripts/configs/example_evaluate.yaml"
       ]
     }
   ]

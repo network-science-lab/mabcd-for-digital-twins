@@ -59,24 +59,9 @@ parameters for the provided networks.
 
 ### 3. Proximity Evaluator
 
-TO DO!!!
+See `scripts/configs/example_evaluate.yaml` for an example configuration file that assess quality 
+of the mABCD parameters found by the finder.
 
 ## Acknowledgment
 
 This work was supported by the...
-
-
-## Doodles
-
-As for uv, I'm still learning it, so some parts may be not optimal. I'm trying to follow our
-colleagues from https://github.com/neptune-ai/neptune-exporter
-
-
-WHAT TO IMPROVE:
-<!-- - ADD LOGGING THE EVALUATED CONFIGURATIONS -->
-<!-- - INCLUDE TAU ALONG XI -->
-<!-- - CHANGE FORM OF THA A MATRIX -->
-<!-- - CHANGE LOSS FUNCTION -->
-<!-- - TRIM OUTLAYING PARAMETERS -->
-- TEST ON THE MABCD NETWORK
-- ASSESS QUALITY OF ESTIMATION

@@ -175,7 +175,7 @@ def estimate_config_fancy(
         n_jobs=1,
     )
     print(
-        "[BEST SOLUTION] ",
+        f"[BEST SOLUTION in {np.where(result.func_vals == result.fun)[0][0].item() + 1}th step] ",
         "loss: %.5f" % result.fun,
         "dv: ", {dv.name: x for (dv, x) in zip(decision_space, result.x)}
     )

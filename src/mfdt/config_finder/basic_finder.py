@@ -32,7 +32,8 @@ def get_tau(net: nd.MultilayerNetwork, alpha: float | None = 0.05) -> dict[str, 
     layer_names = sorted(list(net.layers))
 
     degree_sequence  = cr_helpers.get_degree_sequence(net).T
-    degree_sequence = degree_sequence.sort_index().sort_values(by=layer_names[0], ascending=False)
+    degree_sequence["sum"] = degree_sequence.sum(axis=1)
+    degree_sequence = degree_sequence.sort_index().sort_values(by="sum", ascending=False)
     actors_map = {id: idx for idx, id in enumerate(list(degree_sequence.index)[::-1])}
     degree_sequence = degree_sequence.rename(index=actors_map)
 
@@ -62,7 +63,7 @@ def get_r(net: nd.MultilayerNetwork, seed: int | None = None) -> dict[str, float
     layer_names = sorted(list(net.layers))
 
     ref_layer = net[layer_names[0]]
-    ref_partitions = nx.community.louvain_communities(ref_layer, seed=seed)
+    ref_partitions = cr_helpers.get_communities(ref_layer, seed=seed)
 
     r = {}
     for l_name in layer_names:
@@ -78,7 +79,13 @@ def get_r(net: nd.MultilayerNetwork, seed: int | None = None) -> dict[str, float
 
 
 def _fit_exponent_powerlaw(raw_data: list[int] | list[float]) -> float:
-    results = powerlaw.Fit(raw_data, discrete=True, verbose=False)
+    results = powerlaw.Fit(
+        data=raw_data,
+        discrete=True,
+        verbose=False,
+        # fit_method="KS",  # uncomment to use Kolmogorov-Smirnov test
+        xmin_distribution="power_law",
+    )
     return results.alpha
 
 
@@ -112,10 +119,9 @@ def _avg_partitions_noise(
 
 def get_beta_s_S_xi(net: nx.Graph, cap_estimates: bool = False) -> dict[str, float]:
     """Get powerlaw exponent and min/max community size for a given layer."""
-    # partitions = nx.community.louvain_communities(net)
-    partitions = nx.community.greedy_modularity_communities(net)
+    partitions = cr_helpers.get_communities(net)
     partitions_sizes = [len(part) for part in partitions]
-    min_ps = min(partitions_sizes) if not cap_estimates else max(min(partitions_sizes), 30)
+    min_ps = min(partitions_sizes) if not cap_estimates else max(min(partitions_sizes), 10)
     return {
         "beta": _fit_exponent_powerlaw(partitions_sizes),
         "s": min_ps / len(net.nodes),
