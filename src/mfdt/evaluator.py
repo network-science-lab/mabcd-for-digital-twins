@@ -1,6 +1,7 @@
 """Evaluate how well the parameters of mABCD have been found for the given network."""
 
 import json
+import pandas as pd
 import numpy as np
 from typing import Any
 from scipy.stats import kstest
@@ -15,7 +16,9 @@ from mfdt.config_finder.basic_finder import (
 )
 
 
-def divergence_R_edges_correlation(original: Network, twin: Network) -> np.float64:
+def divergence_R_edges_correlation(
+    original: Network, twin: Network, **kwargs
+) -> np.float64:
     """
     Calculate the divergence score for edges correlation matrices R of the original and twin networks.
     """
@@ -26,32 +29,38 @@ def divergence_R_edges_correlation(original: Network, twin: Network) -> np.float
     return np.sqrt(rss / (l * (l - 1)))
 
 
-def divergence_tau_degrees_correlation(original: Network, twin: Network) -> np.float64:
+def divergence_tau_degrees_correlation(
+    original: Network, twin: Network, **kwargs
+) -> np.float64:
     """
     Calculate the divergence score for degree correlation matrices of the original and twin networks.
     """
-    # get sum of degrees across layers
-    # label actors accordingly
-    # compute kendall tau layerwise on subset of mutually active nodes
     degrees_cor_mat_orig = get_degrees_cor(original.n_graph_nx)
     degrees_cor_mat_twin = get_degrees_cor(twin.n_graph_nx)
     l = len(original.n_graph_nx.layers.keys())
     rss = ((degrees_cor_mat_orig - degrees_cor_mat_twin) ** 2).values.sum()
-    return np.sqrt(rss / (4 * l * (l - 1))))
+    return np.sqrt(rss / (4 * l * (l - 1)))
 
 
-def divergence_r_communities_correlation(original: Network, twin: Network) -> np.float64:
+def divergence_r_communities_correlation(
+    original: Network,
+    twin: Network,
+    original_communities: dict[str, list[set[int]]],
+    twin_communities: dict[str, list[set[int]]],
+) -> np.float64:
     """
     Calculate the divergence score for communities correlation matrices of the original and twin networks.
     """
-    edges_cor_mat_orig = get_partitions_cor(original.n_graph_nx)
-    edges_cor_mat_twin = get_partitions_cor(twin.n_graph_nx)
+    edges_cor_mat_orig = get_partitions_cor(original.n_graph_nx, original_communities)
+    edges_cor_mat_twin = get_partitions_cor(twin.n_graph_nx, twin_communities)
     l = len(original.n_graph_nx.layers.keys())
     rss = ((edges_cor_mat_orig - edges_cor_mat_twin) ** 2).values.sum()
     return np.sqrt(rss / (l * (l - 1)))
 
 
-def divergence_gamma_degree_distribution(original: Network, twin: Network) -> np.float64:
+def divergence_gamma_degree_distribution(
+    original: Network, twin: Network, **kwargs
+) -> np.float64:
     """
     Calculate the divergence score for degree distributions of the original and twin networks.
     """
@@ -65,31 +74,39 @@ def divergence_gamma_degree_distribution(original: Network, twin: Network) -> np
 
 
 def divergence_beta_community_sizes_distribution(
-    original: Network, twin: Network, seed: int = 42
+    original: Network,
+    twin: Network,
+    original_communities: dict[str, list[set[int]]],
+    twin_communities: dict[str, list[set[int]]],
 ) -> np.float64:
     """
     Calculate the divergence score for community size distributions of the original and twin networks.
     """
     ks_distances = 0.0
-    for l_name, l_graph in original.n_graph_nx.layers.items():
-        twin_com_sizes_seq = [
-            len(com) for com in get_communities(twin.n_graph_nx.layers[l_name], seed)
-        ]
-        orig_com_sizes_seq = [len(com) for com in get_communities(l_graph, seed)]
+    for l_name, _ in original.n_graph_nx.layers.items():
+        twin_com_sizes_seq = [len(com) for com in twin_communities[l_name]]
+        orig_com_sizes_seq = [len(com) for com in original_communities[l_name]]
         ks_distances += kstest(orig_com_sizes_seq, twin_com_sizes_seq).statistic
     l = len(original.n_graph_nx.layers.keys())
     return ks_distances / l
 
 
-def divergence_xi_intercommunity_noise(original: Network, twin: Network) -> np.float64:
+def divergence_xi_intercommunity_noise(
+    original: Network,
+    twin: Network,
+    original_communities: dict[str, list[set[int]]],
+    twin_communities: dict[str, list[set[int]]],
+) -> np.float64:
     """
     Calculate the divergence score for intercommunity noise of the original and twin networks.
     """
     xi_rss = 0.0
-    for l_name, l_graph in original.n_graph_nx.layers.items():
-        xi_original = _avg_partitions_noise(l_graph, get_communities(l_graph))
+    for l_name, _ in original.n_graph_nx.layers.items():
+        xi_original = _avg_partitions_noise(
+            original.n_graph_nx.layers[l_name], original_communities[l_name]
+        )
         twin_l_graph = twin.n_graph_nx.layers[l_name]
-        xi_twin = _avg_partitions_noise(twin_l_graph, get_communities(twin_l_graph))
+        xi_twin = _avg_partitions_noise(twin_l_graph, twin_communities[l_name])
         xi_rss += (xi_original - xi_twin) ** 2
     l = len(original.n_graph_nx.layers.keys())
     return np.sqrt(xi_rss / l)
@@ -107,8 +124,9 @@ divergencies_calculators = {
 
 def compute_error(
     original_network: Network,
-    # original_communities: dict[str, list[set[int]]],
+    original_communities: dict[str, list[set[int]]],
     twin_network: Network,
+    twin_communities: dict[str, list[set[int]]],
     divergencies: list[str],
 ) -> dict[str, Any]:
     """Estimate configuration for given network."""
@@ -126,7 +144,12 @@ def compute_error(
     )
     # print([len(lc) for ln, lc in original_communities.items()])
     errors = {
-        div: divergencies_calculators[div](original_network, twin_network)
+        div: divergencies_calculators[div](
+            original_network,
+            twin_network,
+            original_communities=original_communities,
+            twin_communities=twin_communities,
+        )
         for div in divergencies
     }
     return errors
@@ -143,11 +166,13 @@ def get_original_network(on_path: str, lm_path: str) -> Network:
     return original_network
 
 
-def get_original_communities(on: Network) -> dict[str, list[set[Any]]]:
-    """Cluster the original network to use resulting partitions in evaluation."""
+def get_communities_all_layers(
+    net: Network,
+) -> dict[str, list[set[Any]] | list[frozenset[Any]]]:
+    """Cluster the network to use resulting partitions in evaluation."""
     return {
         l_name: get_communities(l_graph)
-        for l_name, l_graph in on.n_graph_nx.layers.items()
+        for l_name, l_graph in net.n_graph_nx.layers.items()
     }
 
 
@@ -160,22 +185,24 @@ def run_experiments(config: dict[str, Any]) -> None:
         config["original_network"], config["layer_map"]
     )
     twin_networks = load_networks(networks=config["twin_networks"], device="cpu")
-    original_communities = get_original_communities(original_network)
+    original_communities = get_communities_all_layers(original_network)
 
     print("Starting evaluation of the estimated configuration...")
     t_errors = {}
     for twin in twin_networks:
+        twin_communities = get_communities_all_layers(twin)
         t_error = compute_error(
             original_network=original_network,
-            # original_communities=original_communities,
+            original_communities=original_communities,
             twin_network=twin,
+            twin_communities=twin_communities,
             divergencies=divergencies,
         )
         t_error[twin.n_name] = t_error
     # create dataframe from this dict
-
+    df_errors = pd.DataFrame.from_dict(t_errors, orient="index")
     # add an entry with averaged errors over all the twins
 
     # save errors into the output directory
-    
+
     print(f"Estimated configs saved.")

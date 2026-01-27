@@ -149,13 +149,19 @@ def get_edges_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
     return edges_cor_df.round(3).fillna(0.0)
 
 
-def get_partitions_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
+def get_partitions_cor(
+    net: nd.MultilayerNetwork, partitions: dict[str, list[set]]
+) -> pd.DataFrame:
     """Get correlation (AMI) matrix for partitions."""
     partitions_cor_raw = []
     for la_name, lb_name in cr_helpers.prepare_layer_pairs(list(net.layers.keys())):
         aligned_layers = cr_helpers.align_layers(net, la_name, lb_name, "destructive")
         partitions_stat = correlations.partitions_correlation(
-            aligned_layers[la_name], aligned_layers[lb_name], seed=42
+            aligned_layers[la_name],
+            aligned_layers[lb_name],
+            graph_1_partitions=partitions[la_name],
+            graph_2_partitions=partitions[lb_name],
+            seed=42,
         )
         partitions_cor_raw.append({(la_name, lb_name): partitions_stat})
     partitions_cor_df = cr_helpers.create_correlation_matrix(partitions_cor_raw)
