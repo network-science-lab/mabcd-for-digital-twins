@@ -12,10 +12,10 @@ twin_networks: [
 evaluator:
   out_dir: "./examples/evaluate"
   divergencies: [
-    "R",
-    "tau",
-    "r",
-    "gamma",
-    "beta",
-    "xi",
+    "R_edges_correlation",
+    "tau_degrees_correlation",
+    "r_communities_correlation",
+    "gamma_degree_distribution",
+    "beta_community_sizes_distribution",
+    "xi_intercommunity_noise",
   ]

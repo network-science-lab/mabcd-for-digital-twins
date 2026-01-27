@@ -26,14 +26,16 @@ def get_tau(net: nd.MultilayerNetwork, alpha: float | None = 0.05) -> dict[str, 
     Note, that due to multilaterance of the network, the routine first converts labels of nodes
     from the first (alphabetically) layer, in a way to maximise the correlation (a node with the
     maximal degree has assigned the highest ID). Then it uses these labels in computations of the
-    correlations in remaining layers. In addition it considers only nodes with a positive degree.  
+    correlations in remaining layers. In addition it considers only nodes with a positive degree.
     """
     net = net.to_multiplex()[0]
     layer_names = sorted(list(net.layers))
 
-    degree_sequence  = cr_helpers.get_degree_sequence(net).T
+    degree_sequence = cr_helpers.get_degree_sequence(net).T
     degree_sequence["sum"] = degree_sequence.sum(axis=1)
-    degree_sequence = degree_sequence.sort_index().sort_values(by="sum", ascending=False)
+    degree_sequence = degree_sequence.sort_index().sort_values(
+        by="sum", ascending=False
+    )
     actors_map = {id: idx for idx, id in enumerate(list(degree_sequence.index)[::-1])}
     degree_sequence = degree_sequence.rename(index=actors_map)
 
@@ -47,14 +49,14 @@ def get_tau(net: nd.MultilayerNetwork, alpha: float | None = 0.05) -> dict[str, 
             variant="b",
         )
         tau[l_name] = statistic.item() if (not alpha or pvalue < alpha) else 0.0
-    
+
     return tau
 
 
 def get_r(net: nd.MultilayerNetwork, seed: int | None = None) -> dict[str, float]:
     """
     Get correlations between partitions.
-    
+
     Note, that due to impossibility to reverse the process of creating partitions by MLNABCD, this
     function only approximates the correlations as follows. It takes the first (alphabetically)
     layer of the network as a reference. Then it uses it to compute correlations with other layers.
@@ -74,7 +76,7 @@ def get_r(net: nd.MultilayerNetwork, seed: int | None = None) -> dict[str, float
             seed=seed,
         )
         r[l_name] = ami
-    
+
     return r
 
 
@@ -89,7 +91,9 @@ def _fit_exponent_powerlaw(raw_data: list[int] | list[float]) -> float:
     return results.alpha
 
 
-def get_gamma_delta_Delta(net: nx.Graph, cap_estimates: bool = False) -> dict[str, float]:
+def get_gamma_delta_Delta(
+    net: nx.Graph, cap_estimates: bool = False
+) -> dict[str, float]:
     """Get powerlaw exponent and min/max degree for a given layer."""
     degrees = [d for _, d in net.degree()]
     max_degree = max(degrees)
@@ -106,7 +110,7 @@ def _avg_partitions_noise(
 ) -> float:
     """
     The noise is fraction of edges inside partitions to number of all edges in the graph.
-    
+
     xi = 0 -> all communities are separated, xi = 1 -> no distinctive communities.
     """
     all_edges = len(net.edges)
@@ -121,7 +125,9 @@ def get_beta_s_S_xi(net: nx.Graph, cap_estimates: bool = False) -> dict[str, flo
     """Get powerlaw exponent and min/max community size for a given layer."""
     partitions = cr_helpers.get_communities(net)
     partitions_sizes = [len(part) for part in partitions]
-    min_ps = min(partitions_sizes) if not cap_estimates else max(min(partitions_sizes), 10)
+    min_ps = (
+        min(partitions_sizes) if not cap_estimates else max(min(partitions_sizes), 10)
+    )
     return {
         "beta": _fit_exponent_powerlaw(partitions_sizes),
         "s": min_ps / len(net.nodes),
@@ -135,13 +141,57 @@ def get_edges_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
     edges_cor_raw = []
     for la_name, lb_name in cr_helpers.prepare_layer_pairs(list(net.layers.keys())):
         aligned_layers = cr_helpers.align_layers(net, la_name, lb_name, "destructive")
-        edges_stat = correlations.edges_r(aligned_layers[la_name], aligned_layers[lb_name])
+        edges_stat = correlations.edges_r(
+            aligned_layers[la_name], aligned_layers[lb_name]
+        )
         edges_cor_raw.append({(la_name, lb_name): edges_stat})
     edges_cor_df = cr_helpers.create_correlation_matrix(edges_cor_raw)
     return edges_cor_df.round(3).fillna(0.0)
 
 
-def get_layer_params(net: nd.MultilayerNetwork, seed: int | None = None) -> pd.DataFrame:
+def get_partitions_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
+    """Get correlation (AMI) matrix for partitions."""
+    partitions_cor_raw = []
+    for la_name, lb_name in cr_helpers.prepare_layer_pairs(list(net.layers.keys())):
+        aligned_layers = cr_helpers.align_layers(net, la_name, lb_name, "destructive")
+        partitions_stat = correlations.partitions_correlation(
+            aligned_layers[la_name], aligned_layers[lb_name], seed=42
+        )
+        partitions_cor_raw.append({(la_name, lb_name): partitions_stat})
+    partitions_cor_df = cr_helpers.create_correlation_matrix(partitions_cor_raw)
+    return partitions_cor_df.round(3).fillna(0.0)
+
+def _label_nodes_by_total_degree(net: nd.MultilayerNetwork) -> dict[Any, int]:
+    """Label nodes according to their total degree across all layers."""
+    nodes_total_degree = {}
+    for layer in net.layers.values():
+        for n, d in layer.degree():
+            nodes_total_degree[n] = nodes_total_degree.get(n, 0) + d
+    nodes_to_labels = {
+        e[0]: idx
+        for idx, e in enumerate(
+            sorted(nodes_total_degree.items(), key=lambda x: x[1], reverse=True)
+        )
+    }
+    return nodes_to_labels
+
+def get_degrees_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
+    """Get correlation (Kendall tau) matrix for degrees."""
+    nodes_to_labels = _label_nodes_by_total_degree(net)
+    degrees_cor_raw = []
+    for la_name, lb_name in cr_helpers.prepare_layer_pairs(list(net.layers.keys())):
+        aligned_layers = cr_helpers.align_layers(net, la_name, lb_name, "destructive")
+        degrees_stat = correlations.degrees_correlation(
+            aligned_layers[la_name], aligned_layers[lb_name],
+        )
+        degrees_cor_raw.append({(la_name, lb_name): degrees_stat})
+    degrees_cor_df = cr_helpers.create_correlation_matrix(degrees_cor_raw)
+    return degrees_cor_df.round(3).fillna(0.0)
+
+
+def get_layer_params(
+    net: nd.MultilayerNetwork, seed: int | None = None
+) -> pd.DataFrame:
     """Infer layers' parameters used by MLNABCD for a given network."""
     q, gamma_delta_Delta, beta_s_S_xi = {}, {}, {}
 
