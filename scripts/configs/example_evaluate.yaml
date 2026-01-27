@@ -1,0 +1,17 @@
+run:
+  experiment_type: "evaluate"
+  rng_seed: 43
+
+network: "smallart^sf3"
+twins: "smallart^sf3"  # TODO add number of steps in the logs
+
+evaluator:
+  out_dir: "./examples/evaluate"
+  divergency: [
+    "R",
+    "tau",
+    "r",
+    "gamma",
+    "beta",
+    "xi",
+  ]

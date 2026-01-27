@@ -14,16 +14,33 @@ from skopt.utils import OptimizeResult
 
 def _plot_trajectory(ax: Axes, result: OptimizeResult) -> Axes:
     plot_convergence(("gp_min", result), ax=ax)
+    best_step = np.where(result.func_vals == result.fun)[0][0].item() + 1
+    x = np.arange(start=1, stop=len(result.func_vals)+1, step=1)
     ax.plot(
-        np.arange(start=1, stop=len(result.func_vals)+1, step=1),
+        x,
         result.func_vals,
         linestyle="--",
         linewidth=1.5,
         alpha=0.4,
         label="gp_curr",
     )
+    ax.axvline(
+        x=best_step,
+        color="red",
+        linestyle=":",
+        linewidth=1.5,
+        alpha=0.9,
+    )
+    ticks = list(ax.get_xticks())
+    if best_step not in ticks:
+        ticks.append(best_step)
+        ticks = sorted(ticks)
+        ax.set_xticks(ticks)
+    for tick, label in zip(ax.get_xticks(), ax.get_xticklabels()):
+        if tick == best_step:
+            label.set_color("red")
     ax.legend()
-    ax.set_title("Covergence plot")
+    ax.set_title("Convergence plot")
     return ax
 
 
