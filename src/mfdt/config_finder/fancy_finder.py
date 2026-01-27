@@ -11,6 +11,7 @@ import yaml
 
 from mfdt.config_finder.ff_figures import plot_optimisation_process
 from mfdt.config_finder.ff_helpers import (
+    SerialOptimizeResult,
     convert_result,
     estimate_fixed_params,
     get_comm_ami,
@@ -185,6 +186,12 @@ def estimate_config_fancy(
         np.save(f"{log_dir}/A.npy", A)
         with open(f"{log_dir}/optim.txt", "w", encoding="utf-8") as f:
             f.write(result.__str__())
+        SerialOptimizeResult(
+            fun=result.fun,
+            x=result.x,
+            func_vals=result.func_vals,
+            x_iters=result.x_iters,
+        ).dump(f"{log_dir}/optim.pkl")
     
     dv_opt = convert_result(decision_space, result)
     if "r" in decision_variables:
