@@ -161,6 +161,7 @@ def get_partitions_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
     partitions_cor_df = cr_helpers.create_correlation_matrix(partitions_cor_raw)
     return partitions_cor_df.round(3).fillna(0.0)
 
+
 def _label_nodes_by_total_degree(net: nd.MultilayerNetwork) -> dict[Any, int]:
     """Label nodes according to their total degree across all layers."""
     nodes_total_degree = {}
@@ -175,6 +176,7 @@ def _label_nodes_by_total_degree(net: nd.MultilayerNetwork) -> dict[Any, int]:
     }
     return nodes_to_labels
 
+
 def get_degrees_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
     """Get correlation (Kendall tau) matrix for degrees."""
     nodes_to_labels = _label_nodes_by_total_degree(net)
@@ -182,7 +184,7 @@ def get_degrees_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
     for la_name, lb_name in cr_helpers.prepare_layer_pairs(list(net.layers.keys())):
         aligned_layers = cr_helpers.align_layers(net, la_name, lb_name, "destructive")
         degrees_stat = correlations.degrees_correlation(
-            aligned_layers[la_name], aligned_layers[lb_name],
+            aligned_layers[la_name], aligned_layers[lb_name], nodes_to_labels
         )
         degrees_cor_raw.append({(la_name, lb_name): degrees_stat})
     degrees_cor_df = cr_helpers.create_correlation_matrix(degrees_cor_raw)

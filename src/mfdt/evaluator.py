@@ -1,4 +1,4 @@
-"""Evaulate how well the parameters of mABCD have been found for the given network."""
+"""Evaluate how well the parameters of mABCD have been found for the given network."""
 
 import json
 import numpy as np
@@ -15,46 +15,43 @@ from mfdt.config_finder.basic_finder import (
 )
 
 
-def divergence_R_edges_correlation(original: Network, twin: Network) -> float:
+def divergence_R_edges_correlation(original: Network, twin: Network) -> np.float64:
     """
     Calculate the divergence score for edges correlation matrices R of the original and twin networks.
     """
     edges_cor_mat_orig = get_edges_cor(original.n_graph_nx)
     edges_cor_mat_twin = get_edges_cor(twin.n_graph_nx)
     l = len(original.n_graph_nx.layers.keys())
-    return np.sqrt(
-        np.sum((edges_cor_mat_orig - edges_cor_mat_twin) ** 2) / (l * (l - 1))
-    )
+    rss = ((edges_cor_mat_orig - edges_cor_mat_twin) ** 2).values.sum()
+    return np.sqrt(rss / (l * (l - 1)))
 
 
-def divergence_tau_degrees_correlation(original: Network, twin: Network) -> float:
+def divergence_tau_degrees_correlation(original: Network, twin: Network) -> np.float64:
     """
     Calculate the divergence score for degree correlation matrices of the original and twin networks.
     """
-    #get sum of degrees across layers
-    #label actors accordingly
+    # get sum of degrees across layers
+    # label actors accordingly
     # compute kendall tau layerwise on subset of mutually active nodes
     degrees_cor_mat_orig = get_degrees_cor(original.n_graph_nx)
     degrees_cor_mat_twin = get_degrees_cor(twin.n_graph_nx)
     l = len(original.n_graph_nx.layers.keys())
-    return np.sqrt(
-        np.sum((degrees_cor_mat_orig - degrees_cor_mat_twin) ** 2) / (4 * l * (l - 1))
-    )
+    rss = ((degrees_cor_mat_orig - degrees_cor_mat_twin) ** 2).values.sum()
+    return np.sqrt(rss / (4 * l * (l - 1))))
 
 
-def divergence_r_communities_correlation(original: Network, twin: Network) -> float:
+def divergence_r_communities_correlation(original: Network, twin: Network) -> np.float64:
     """
     Calculate the divergence score for communities correlation matrices of the original and twin networks.
     """
     edges_cor_mat_orig = get_partitions_cor(original.n_graph_nx)
     edges_cor_mat_twin = get_partitions_cor(twin.n_graph_nx)
     l = len(original.n_graph_nx.layers.keys())
-    return np.sqrt(
-        np.sum((edges_cor_mat_orig - edges_cor_mat_twin) ** 2) / (l * (l - 1))
-    )
+    rss = ((edges_cor_mat_orig - edges_cor_mat_twin) ** 2).values.sum()
+    return np.sqrt(rss / (l * (l - 1)))
 
 
-def divergence_gamma_degree_distribution(original: Network, twin: Network) -> float:
+def divergence_gamma_degree_distribution(original: Network, twin: Network) -> np.float64:
     """
     Calculate the divergence score for degree distributions of the original and twin networks.
     """
@@ -69,7 +66,7 @@ def divergence_gamma_degree_distribution(original: Network, twin: Network) -> fl
 
 def divergence_beta_community_sizes_distribution(
     original: Network, twin: Network, seed: int = 42
-) -> float:
+) -> np.float64:
     """
     Calculate the divergence score for community size distributions of the original and twin networks.
     """
@@ -84,7 +81,7 @@ def divergence_beta_community_sizes_distribution(
     return ks_distances / l
 
 
-def divergence_xi_intercommunity_noise(original: Network, twin: Network) -> float:
+def divergence_xi_intercommunity_noise(original: Network, twin: Network) -> np.float64:
     """
     Calculate the divergence score for intercommunity noise of the original and twin networks.
     """
@@ -176,6 +173,9 @@ def run_experiments(config: dict[str, Any]) -> None:
         )
         t_error[twin.n_name] = t_error
     # create dataframe from this dict
+
     # add an entry with averaged errors over all the twins
+
     # save errors into the output directory
+    
     print(f"Estimated configs saved.")
