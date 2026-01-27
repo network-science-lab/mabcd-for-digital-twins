@@ -1,10 +1,12 @@
 [project]
 name = "mfdt"
-version = "0.3.0"
+version = "0.4.0"
 description = "mABCD for Digital Twins (mfdt)"
 readme = "README.md"
 authors = [
-    { name = "Michał Czuba", email = "michal.czuba@pwr.edu.pl" }
+    { name = "Michal Czuba", email = "michal.czuba@pwr.edu.pl" },
+    { name = "Lukasz Krainski", email = "e@ma.il" },
+    { name = "Mateusz Stolarski", email = "e@ma.il" },
 ]
 requires-python = ">=3.12"
 dependencies = [

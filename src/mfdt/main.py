@@ -12,6 +12,7 @@ from network_diffusion.utils import set_rng_seed
 
 from mfdt.generator import run_experiments as re_generator
 from mfdt.finder import run_experiments as re_finder
+from mfdt.evaluator import run_experiments as re_evaluator
 
 
 def parse_args(*args):
@@ -23,7 +24,8 @@ def parse_args(*args):
         type=str,
         # default="scripts/configs/example_generate_1.yaml",
         # default="scripts/configs/example_generate_2/runner_config.yaml",
-        default="scripts/configs/example_find.yaml",
+        # default="scripts/configs/example_find.yaml",
+        default="scripts/configs/example_evaluate.yaml",
     )
     return parser.parse_args(*args)
 
@@ -43,7 +45,9 @@ def main():
     if (experiment_type := config["run"].get("experiment_type")) == "generate":
         entrypoint = re_generator
     elif experiment_type == "find":
-        entrypoint = re_finder  
+        entrypoint = re_finder
+    elif experiment_type == "evaluate":
+        entrypoint = re_evaluator  
     else:
         raise ValueError(f"Unknown experiment type {experiment_type}")
 
