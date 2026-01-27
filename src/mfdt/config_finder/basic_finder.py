@@ -120,7 +120,7 @@ def get_beta_s_S_xi(net: nx.Graph, cap_estimates: bool = False) -> dict[str, flo
     """Get powerlaw exponent and min/max community size for a given layer."""
     partitions = cr_helpers.get_communities(net)
     partitions_sizes = [len(part) for part in partitions]
-    min_ps = min(partitions_sizes) if not cap_estimates else max(min(partitions_sizes), 30)
+    min_ps = min(partitions_sizes) if not cap_estimates else max(min(partitions_sizes), 10)
     return {
         "beta": _fit_exponent_powerlaw(partitions_sizes),
         "s": min_ps / len(net.nodes),
