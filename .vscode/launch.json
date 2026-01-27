@@ -14,8 +14,8 @@
       "console": "integratedTerminal",
       "justMyCode": false,
       "args": [
-        // "scripts/configs/example_find.yaml"
-        "scripts/configs/example_evaluate.yaml"
+        "scripts/configs/example_find.yaml"
+        // "scripts/configs/example_evaluate.yaml"
       ]
     }
   ]

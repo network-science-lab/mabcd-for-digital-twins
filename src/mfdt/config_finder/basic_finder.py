@@ -32,7 +32,8 @@ def get_tau(net: nd.MultilayerNetwork, alpha: float | None = 0.05) -> dict[str, 
     layer_names = sorted(list(net.layers))
 
     degree_sequence  = cr_helpers.get_degree_sequence(net).T
-    degree_sequence = degree_sequence.sort_index().sort_values(by=layer_names[0], ascending=False)
+    degree_sequence["sum"] = degree_sequence.sum(axis=1)
+    degree_sequence = degree_sequence.sort_index().sort_values(by="sum", ascending=False)
     actors_map = {id: idx for idx, id in enumerate(list(degree_sequence.index)[::-1])}
     degree_sequence = degree_sequence.rename(index=actors_map)
 
