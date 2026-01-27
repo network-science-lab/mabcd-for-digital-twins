@@ -3,7 +3,10 @@ run:
   rng_seed: 43
 
 network: "smallart^sf3"
-twins: "examples/find/smallart/sf3/logs/8"
+twins: [
+  "mabcd^./examples/find/smallart/sf3/logs/8/*",
+  # "mabcd^./examples/find/smallart/sf3/logs/9/0_eval_edges.dat",
+]
 
 evaluator:
   out_dir: "./examples/evaluate"

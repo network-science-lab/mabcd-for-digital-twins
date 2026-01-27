@@ -3,8 +3,8 @@ run:
   rng_seed: 43
 
 networks: [
-    # mlnabcd^series_1/edges_2.dat,
-    # mlnabcd^series_1/*,  # or with a wildcard
+    # mabcd^series_1/edges_2.dat,
+    # mabcd^series_1/*,  # or with a wildcard
     # "bigreal^arxiv_netscience_coauthorship",
     # "bigreal^arxiv_netscience_coauthorship_math.oc",
     # "bigreal^cannes",  # TODO: compute it on the server - it's too heavy

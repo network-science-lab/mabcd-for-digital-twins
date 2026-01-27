@@ -8,10 +8,11 @@ from mfdt.params_handler import load_networks, create_out_dir
 def run_experiments(config: dict[str, Any]) -> None:
 
     original_network = load_networks(networks=[config["network"]], device="cpu")[0]
-    # twins = load_networks(networks=config["twins"], device="cpu")
+    twins = load_networks(networks=config["twins"], device="cpu")
     out_dir = create_out_dir(config["evaluator"]["out_dir"])
     # rng_seed = config["run"]["rng_seed"]
 
     print("Starting evaluation of the estimated configuration...")
-    # TODO: do evaluation
+    for t in twins:
+        print(t.n_type, t.n_name, t.n_graph_nx.get_actors_num(), t.n_graph_nx.get_layer_names())
     print(f"Estimated configs saved.")
