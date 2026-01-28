@@ -130,8 +130,8 @@ def get_beta_s_S_xi(net: nx.Graph, cap_estimates: bool = False) -> dict[str, flo
     }
 
 
-def get_edges_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
-    """Get correlation matrix for edges."""
+def get_edges_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:  # TODO: move to corelations
+    """Get correlation matrix for edges (R)."""
     edges_cor_raw = []
     for la_name, lb_name in cr_helpers.prepare_layer_pairs(list(net.layers.keys())):
         aligned_layers = cr_helpers.align_layers(net, la_name, lb_name, "destructive")
@@ -140,7 +140,7 @@ def get_edges_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
     edges_cor_df = cr_helpers.create_correlation_matrix(edges_cor_raw)
     return edges_cor_df.round(3).fillna(0.0)
 
-
+# TODO: move to corelations
 def get_partitions_cor(net: nd.MultilayerNetwork, partitions: dict[str, list[set]]) -> pd.DataFrame:
     """Get correlation (AMI) matrix for partitions."""
     partitions_cor_raw = []
@@ -158,7 +158,7 @@ def get_partitions_cor(net: nd.MultilayerNetwork, partitions: dict[str, list[set
     return partitions_cor_df.round(3).fillna(0.0)
 
 
-def _label_nodes_by_total_degree(net: nd.MultilayerNetwork) -> dict[Any, int]:
+def _label_nodes_by_total_degree(net: nd.MultilayerNetwork) -> dict[Any, int]:  # TODO: move to correlations
     """Label nodes according to their total degree across all layers."""
     nodes_total_degree = {}
     for layer in net.layers.values():
@@ -173,7 +173,7 @@ def _label_nodes_by_total_degree(net: nd.MultilayerNetwork) -> dict[Any, int]:
     return nodes_to_labels
 
 
-def get_degrees_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
+def get_degrees_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:  # TODO: move to correlations
     """Get correlation (Kendall tau) matrix for degrees."""
     nodes_to_labels = _label_nodes_by_total_degree(net)
     degrees_cor_raw = []

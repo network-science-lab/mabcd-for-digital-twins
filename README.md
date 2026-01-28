@@ -87,3 +87,10 @@ Evaluation experiments:
 ## Acknowledgment
 
 This work was supported by the...
+
+
+TODO: 
+- align loss with paper
+- enrich logging to log diver. tau and r ALWAYS
+- add better loss choice
+- reorganise code

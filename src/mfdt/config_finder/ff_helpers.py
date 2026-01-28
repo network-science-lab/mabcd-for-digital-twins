@@ -73,6 +73,7 @@ def estimate_fixed_params(
     return l_map, est_config
 
 
+# TODO: merge with divergences
 def get_comm_ami(net: nd.MultilayerNetwork, seed: int | None = None) -> np.ndarray:
     """Get interlatyer 'correlations' (i.e. AMI) between partitions."""
     # net = net.to_multiplex()[0]  # TODO: decide if we need that?
@@ -108,6 +109,7 @@ def get_decision_space(decision_variables: list[str], n_layers: int) -> list[Rea
     return decision_space
 
 
+# TODO: merge with divergences
 def frobenius_loss(A: np.ndarray, A_p: np.ndarray) -> float:
     """Frobenius loss."""
     fro_A = np.linalg.norm(A, ord="fro")
@@ -115,6 +117,7 @@ def frobenius_loss(A: np.ndarray, A_p: np.ndarray) -> float:
     return np.abs(fro_A_p - fro_A).item()
 
 
+# TODO: merge with divergences
 def dummy_loss(A: np.ndarray, A_p: np.ndarray) -> float:
     """Mean difference between A and A_p elements under the lower triangle."""
     d_A = np.abs(A_p - A)
