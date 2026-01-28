@@ -24,6 +24,7 @@ dependencies = [
     "scikit-optimize>=0.10.2",
     "tqdm>=4.66.6",
     "scipy>=1.13.1",
+    "seaborn>=0.13.2",
 ]
 
 [project.scripts]

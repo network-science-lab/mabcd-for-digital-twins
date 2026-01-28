@@ -13,7 +13,7 @@ finder:
       criterium: dummy
       decision_variables: ["r"]
       cap_fixed_params: False
-      nb_twins: 4
+      nb_twins: 3
       nb_steps: 20
       d_max_iter: 1000
       c_max_iter: 1000
