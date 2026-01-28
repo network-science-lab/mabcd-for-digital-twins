@@ -189,5 +189,5 @@ def run_experiments(config: dict[str, Any]) -> None:
     df_errors.loc["Mean"] = mean_div
     df_errors.loc["Std"] = std_div
     # save errors into the output directory
-    df_errors.to_csv(f"{out_dir}/divergence_scores.csv", index_label="index")
+    df_errors.to_csv(f"{out_dir}/divergence_scores.csv", index_label="graph")
     print(f"Estimated configs saved.")
