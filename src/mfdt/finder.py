@@ -26,7 +26,10 @@ def estimate_config(
         l_map, est_config = estimate_config_rudimentarly(net=network.n_graph_nx, seed=rng_seed)
     elif method["name"] == "fancy":
         l_map, est_config = estimate_config_fancy(
-            net=network.n_graph_nx, log_dir=out_dir / "logs", **method["params"], seed=rng_seed,
+            net=network.n_graph_nx,
+            log_dir=out_dir / "logs",
+            **method["params"],
+            seed=rng_seed,
         )
     else:
         raise ValueError("Unknown estimation method!")
@@ -58,7 +61,6 @@ def estimate_config(
 
 
 def run_experiments(config: dict[str, Any]) -> None:
-
     nets = load_networks(networks=config["networks"], device="cpu")
     out_dir = create_out_dir(config["finder"]["out_dir"])
     method = config["finder"]["method"]

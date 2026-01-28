@@ -21,7 +21,6 @@ def read_mln_config_from_params(mln_config: dict[str, Any]) -> MLNConfig:
 
 
 def run_experiments(config: dict[str, Any]) -> None:
-
     _mln_config = config["mln_config"]
     _mln_config["seed"] = config["run"]["rng_seed"]
     if _mln_config.get("params_path") is None:

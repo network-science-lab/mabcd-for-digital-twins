@@ -31,9 +31,9 @@ def estimate_fixed_params(
     do_tau: bool,
     cap_fixed_params: bool,
     seed: int | None = None,
-) -> tuple[dict[str, int], BaseMLNConfig]:
+) -> tuple[dict[str, str], BaseMLNConfig]:
     """Estimate fixed parameters of the network that will not be searched with skopt."""
-    l_map = {l_name: l_idx for l_idx, l_name in enumerate(sorted(net.layers), 1)}
+    l_map = {l_name: str(l_idx) for l_idx, l_name in enumerate(sorted(net.layers), 1)}
     n = net.get_actors_num()
     edges_cor = get_edges_cor(net=net)
 
@@ -42,12 +42,12 @@ def estimate_fixed_params(
         q[l_name] = get_q(l_graph, n)
         gamma_delta_Delta[l_name] = get_gamma_delta_Delta(l_graph, cap_fixed_params)
         beta_s_S_xi[l_name] = get_beta_s_S_xi(l_graph, cap_fixed_params)
-    
+
     if do_r:
         r = {l_name: None for l_name in net.layers}
     else:
         r = get_r(net=net, seed=seed)
-    
+
     if do_tau:
         tau = {l_name: None for l_name in net.layers}
     else:
@@ -81,7 +81,7 @@ def get_comm_ami(net: nd.MultilayerNetwork, seed: int | None = None) -> np.ndarr
         aligned_layers = cr_helpers.align_layers(net, la_name, lb_name, "destructive")
         part_ami = correlations.partitions_correlation(
             aligned_layers[la_name],
-            aligned_layers[lb_name], 
+            aligned_layers[lb_name],
             seed=seed,
         )
         part_cor_raw.append({(la_name, lb_name): part_ami})
@@ -134,19 +134,25 @@ def get_criterium(name: str) -> Callable:
 def prepare_log_dir(out_dir: Path | None = None) -> Callable:
     """Prepare directory to store logs in if out_dir provided."""
     if out_dir:
+
         class OutDirServer:
             """Mock for TemporaryDirectory to store logs in a reachable dir."""
+
             def __init__(self, out_dir: Path) -> None:
                 self.out_dir_base = out_dir
                 self.call_nb = 1
+
             def __call__(self) -> "OutDirServer":
                 return self
+
             def __enter__(self, *args, **kwargs) -> str:
                 curr = self.out_dir_base / str(self.call_nb)
                 self.call_nb += 1
                 return str(create_out_dir(curr))
+
             def __exit__(self, *args, **kwargs) -> bool:
                 return False
+
         return OutDirServer(out_dir)
         # @contextmanager
         # def mock_tmpdir():

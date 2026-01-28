@@ -5,17 +5,17 @@ run:
 original_network: "smallart^sf3"
 layer_map: "./examples/find/smallart/sf3/lmap.json"
 twin_networks: [
-  "mabcd^./examples/find/smallart/sf3/logs/8/*",
+  "mabcd^./examples/find/smallart/sf3/logs/17/*",
   # "mabcd^./examples/find/smallart/sf3/logs/9/0_eval_edges.dat",
 ]
 
 evaluator:
   out_dir: "./examples/evaluate"
   divergencies: [
-    "R",
-    "tau",
-    "r",
-    "gamma",
-    "beta",
-    "xi",
+    "R_edges_correlation",
+    "tau_degrees_correlation",
+    "r_communities_correlation",
+    "gamma_degree_distribution",
+    "beta_community_sizes_distribution",
+    "xi_intercommunity_noise",
   ]

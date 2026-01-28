@@ -17,7 +17,7 @@ from mfdt.loaders.constants import (
     LAZEGA,
     TOY_NETWORK,
     WILDCARD_ALL,
-    return_some_layers
+    return_some_layers,
 )
 from mfdt.loaders.fmri74 import read_fmri74
 

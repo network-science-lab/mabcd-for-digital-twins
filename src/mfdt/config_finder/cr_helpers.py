@@ -64,7 +64,10 @@ def get_communities(net: nx.Graph, seed: int | None = 42) -> list[set[Any]] | li
 
 def prepare_layer_pairs(entities: list[str]) -> list[tuple[str, str]]:
     # return list(combinations(entities, 2))
-    return [*combinations(entities, 2), *[(a, a) for a in entities]]  # TODO: can be done faster
+    return [
+        *combinations(entities, 2),
+        *[(a, a) for a in entities],
+    ]  # TODO: can be done faster
 
 
 def _get_col_names(raw_statistics: list[dict[tuple[str, str], float]]) -> list[str]:
@@ -77,7 +80,9 @@ def _get_col_names(raw_statistics: list[dict[tuple[str, str], float]]) -> list[s
     return list(set(l_names))
 
 
-def create_correlation_matrix(raw_statistics: list[dict[tuple[str, str], float]]) -> pd.DataFrame:
+def create_correlation_matrix(
+    raw_statistics: list[dict[tuple[str, str], float]],
+) -> pd.DataFrame:
     """Create correlation matrix that can be plotted as a heatmap."""
     col_names = _get_col_names(raw_statistics)
     matrix = pd.DataFrame(index=sorted(col_names), columns=sorted(col_names), data=np.nan)

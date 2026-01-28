@@ -14,7 +14,7 @@ from mfdt.loaders.constants import (
     FREEBASE,
     TIMIK1Q2009,
     WILDCARD_ALL,
-    return_some_layers
+    return_some_layers,
 )
 
 
@@ -27,18 +27,13 @@ def get_ddm_network(
     # read mapping of layer IDs to their names
     with open(layernames_path, encoding="utf-8") as file:
         layer_names = file.readlines()
-    layer_names = [ln.rstrip('\n').split(" ") for ln in layer_names]
+    layer_names = [ln.rstrip("\n").split(" ") for ln in layer_names]
     layer_names = {ln[0]: ln[1] for ln in layer_names}
-    
+
     # read the edgelist and create containers for the layers
-    df = pd.read_csv(
-        edgelist_path,
-        names=["layer_id", "node_1", "node_2", "weight"],
-        sep=" "
-    )
+    df = pd.read_csv(edgelist_path, names=["layer_id", "node_1", "node_2", "weight"], sep=" ")
     net_ids_dict = {
-        l_name: nx.DiGraph() if digraph else nx.Graph()
-        for l_name in list(df["layer_id"].unique())
+        l_name: nx.DiGraph() if digraph else nx.Graph() for l_name in list(df["layer_id"].unique())
     }
 
     # populate network with edges
@@ -48,16 +43,16 @@ def get_ddm_network(
         else:
             attrs = {}
         net_ids_dict[row["layer_id"]].add_edge(row["node_1"], row["node_2"], **attrs)
-    
+
     # rename layers
     net_names_dict = {
-        layer_names[str(layer_id)]: layer_graph
-        for layer_id, layer_graph in net_ids_dict.items()
+        layer_names[str(layer_id)]: layer_graph for layer_id, layer_graph in net_ids_dict.items()
     }
 
     # create multilater network from edges
     return nd.MultilayerNetwork.from_nx_layers(
-        layer_names=list(net_names_dict.keys()), network_list=list(net_names_dict.values())
+        layer_names=list(net_names_dict.keys()),
+        network_list=list(net_names_dict.values()),
     )
 
 
@@ -65,7 +60,7 @@ def get_ddm_network(
 def get_arxiv_network() -> nd.MultilayerNetwork:
     root_path = Path(f"{MLN_RAW_DATA_PATH}/arxiv_netscience_coauthorship/Dataset")
     net = get_ddm_network(
-        layernames_path= root_path / "arxiv_netscience_layers.txt",
+        layernames_path=root_path / "arxiv_netscience_layers.txt",
         edgelist_path=root_path / "arxiv_netscience_multiplex.edges",
         weighted=False,
         digraph=False,
@@ -76,7 +71,7 @@ def get_arxiv_network() -> nd.MultilayerNetwork:
 def get_cannes_network() -> nd.MultilayerNetwork:
     root_path = Path(f"{MLN_RAW_DATA_PATH}/cannes_2013_social/Dataset")
     net = get_ddm_network(
-        layernames_path= root_path / "Cannes2013_layers.txt",
+        layernames_path=root_path / "Cannes2013_layers.txt",
         edgelist_path=root_path / "Cannes2013_multiplex.edges",
         weighted=False,
         digraph=False,

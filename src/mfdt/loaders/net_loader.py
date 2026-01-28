@@ -37,20 +37,23 @@ def _prepare_network(net: nd.MultilayerNetwork) -> nd.MultilayerNetwork:
         l_graph.remove_edges_from(nx.selfloop_edges(l_graph))
         isolated_nodes = list(nx.isolates(l_graph))
         l_graph.remove_nodes_from(isolated_nodes)
-    if net.is_directed(): raise ValueError("Only undirected networks can be processed right now!")
+    if net.is_directed():
+        raise ValueError("Only undirected networks can be processed right now!")
     return net
 
 
 def prepare_network(load_network_func: Callable) -> Callable:
     """Remove isolated nodes and nodes with self-edges only from the network."""
+
     @wraps(load_network_func)
     def wrapper(*args, **kwargs) -> dict[tuple[str, str], nd.MultilayerNetwork]:
         net_dict = load_network_func(*args, **kwargs)
         print("\tremoving self-loops and isolated nodes")
         return {
-            (net_type, net_name): _prepare_network(net_graph) for
-            (net_type, net_name), net_graph in net_dict.items()
+            (net_type, net_name): _prepare_network(net_graph)
+            for (net_type, net_name), net_graph in net_dict.items()
         }
+
     return wrapper
 
 
@@ -67,5 +70,5 @@ def load_network(net_type: str, net_name: str) -> dict[tuple[str, str], nd.Multi
     else:
         raise AttributeError(f"Unknown network type: {net_type}")
     if len(networks) == 0:
-        raise AttributeError(f"Loaded 0 networks!")    
+        raise AttributeError(f"Loaded 0 networks!")
     return {(net_type, net_name): net_graph for net_name, net_graph in networks.items()}

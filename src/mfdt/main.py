@@ -37,7 +37,7 @@ def main():
     with open(args.config, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
     print(f"Loaded config: {config}")
-    
+
     if random_seed := config["run"].get("random_seed"):
         print(f"Setting randomness seed as {random_seed}!")
         set_rng_seed(config["run"]["random_seed"])
@@ -47,7 +47,7 @@ def main():
     elif experiment_type == "find":
         entrypoint = re_finder
     elif experiment_type == "evaluate":
-        entrypoint = re_evaluator  
+        entrypoint = re_evaluator
     else:
         raise ValueError(f"Unknown experiment type {experiment_type}")
 

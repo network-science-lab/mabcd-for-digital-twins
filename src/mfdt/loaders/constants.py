@@ -34,7 +34,7 @@ SF3 = "sf3"
 SF5 = "sf5"
 TIMIK1Q2009 = "timik1q2009"
 TOY_NETWORK = "toy_network"
-FREEBASE = 'Freebase'
+FREEBASE = "Freebase"
 
 MLNABCD_PREFIX = "mlnabcd"
 
@@ -44,11 +44,13 @@ WILDCARD_ALL = "*"
 
 def return_some_layers(get_network_func: Callable) -> Callable:
     """Decorator for network loader to filter out a multilayer network to return only one layer."""
+
     @wraps(get_network_func)
-    def wrapper(layer_slice = None):
+    def wrapper(layer_slice=None):
         net = get_network_func()
         if not layer_slice:
             return net
         l_graphs = [net.layers[layer] for layer in layer_slice]
         return nd.MultilayerNetwork.from_nx_layers(l_graphs, layer_slice)
+
     return wrapper

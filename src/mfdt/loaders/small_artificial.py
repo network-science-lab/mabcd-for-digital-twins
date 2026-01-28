@@ -13,7 +13,7 @@ from mfdt.loaders.constants import (
     SF3,
     SF5,
     WILDCARD_ALL,
-    return_some_layers
+    return_some_layers,
 )
 
 
