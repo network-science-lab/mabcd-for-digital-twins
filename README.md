@@ -62,6 +62,15 @@ parameters for the provided networks.
 See `scripts/configs/example_evaluate.yaml` for an example configuration file that assess quality 
 of the mABCD parameters found by the finder.
 
+## Experiments
+
+- exp_a: rudimentary
+- exp_b: fancy with [r] and d=2
+- exp_c: fancy with [r, tau] and d=2
+- exp_d: fancy with [r] and d=1
+- exp_e: fancy with [r] and d=4
+- exp_f: fancy with [r] and d=8
+
 ## Acknowledgment
 
 This work was supported by the...

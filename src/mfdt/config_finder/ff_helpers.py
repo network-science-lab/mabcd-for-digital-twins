@@ -1,6 +1,8 @@
 """Helpers for fancy methods for inferring mABCD configuration parameters."""
 
+import pickle
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
@@ -152,7 +154,27 @@ def prepare_log_dir(out_dir: Path | None = None) -> Callable:
     return tempfile.TemporaryDirectory
 
 
-def convert_result(decision_space: list[Real], result: OptimizeResult) -> dict[str, list[float]]:
+@dataclass
+class SerialOptimizeResult:
+    """Class to serialise logs as OptimizeResult is not serialisable."""
+    fun: float
+    x: list[float]
+    func_vals: list[float]
+    x_iters: list[list[float]]
+
+    def dump(self, path: str) -> None:
+        with open(path, "wb") as f:
+            pickle.dump(self, f)
+
+    @classmethod
+    def load(cls, path: str) -> "SerialOptimizeResult":
+        with open(path, "rb") as f:
+            return pickle.load(f)
+
+
+def convert_result(
+    decision_space: list[Real], result: OptimizeResult | SerialOptimizeResult
+) -> dict[str, list[float]]:
     """Split optimised values into lists consumable by the mABCD config dict."""
     res_dict = {dv.name: x for (dv, x) in zip(decision_space, result.x)}
     r, tau = {}, {}
