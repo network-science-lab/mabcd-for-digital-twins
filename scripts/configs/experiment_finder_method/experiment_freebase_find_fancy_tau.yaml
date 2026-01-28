@@ -5,13 +5,13 @@ run:
 networks: ["bigreal^Freebase"]
 
 finder:
-  out_dir: "./experiments/find_fancy_r_tau"
+  out_dir: "./experiments/experiment_finder_method/fancy_tau"
   method: 
     name: "fancy"
     params:
       save_logs: True
       criterium: dummy
-      decision_variables: ["r", "tau"]
+      decision_variables: ["tau"]
       cap_fixed_params: False
       nb_twins: 4
       nb_steps: 20

@@ -5,6 +5,6 @@ run:
 networks: ["bigreal^Freebase"]
 
 finder:
-  out_dir: "./experiments/find_rudimentary"
+  out_dir: "./experiments/experiment_finder_method/rudimentary"
   method: 
     name: "rudimentary"

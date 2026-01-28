@@ -125,18 +125,7 @@ def compute_error(
     divergencies: list[str],
 ) -> dict[str, Any]:
     """Estimate configuration for given network."""
-    print(
-        original_network.n_type,
-        original_network.n_name,
-        original_network.n_graph_nx.get_actors_num(),
-        original_network.n_graph_nx.get_layer_names(),
-    )
-    print(
-        twin_network.n_type,
-        twin_network.n_name,
-        twin_network.n_graph_nx.get_actors_num(),
-        twin_network.n_graph_nx.get_layer_names(),
-    )
+    print(f"Evaluating twin network: {twin_network.n_name}...")
     errors = {
         div: divergencies_calculators[div](
             original_network,
@@ -200,5 +189,5 @@ def run_experiments(config: dict[str, Any]) -> None:
     df_errors.loc["Mean"] = mean_div
     df_errors.loc["Std"] = std_div
     # save errors into the output directory
-    df_errors.to_csv(f"{out_dir}/divergence_scores_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
+    df_errors.to_csv(f"{out_dir}/divergence_scores.csv", index_label="index")
     print(f"Estimated configs saved.")

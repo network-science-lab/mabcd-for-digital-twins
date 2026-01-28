@@ -3,13 +3,13 @@ run:
   rng_seed: 42
 
 original_network: "bigreal^Freebase"
-layer_map: "./experiments/find_rudimentary/bigreal/Freebase/lmap.json"
+layer_map: "./experiments/experiment_finder_method/fancy_r/bigreal/Freebase/lmap.json"
 twin_networks: [
-  "mabcd^./experiments/find_rudimentary/bigreal/Freebase/twins/twin_edges*",
+  "mabcd^./experiments/experiment_finder_method/fancy_r/bigreal/Freebase/twins/twin_edges*",
 ]
 
 evaluator:
-  out_dir: "./experiments/find_rudimentary/bigreal/Freebase/evaluate"
+  out_dir: "./experiments/experiment_finder_method/fancy_r/bigreal/Freebase/evaluate"
   divergencies: [
     "R_edges_correlation",
     "tau_degrees_correlation",

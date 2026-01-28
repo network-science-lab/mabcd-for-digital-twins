@@ -8,10 +8,10 @@ mln_config:
   c_max_iter: 1000
   t: 100
   eps: 0.05
-  d: 2
-  edges_filename: twin_edges.dat
-  communities_filename: twin_communities.dat
+  d: 3
+  edges_filename: twin_edges_d3.dat
+  communities_filename: twin_communities_d3.dat
 
 generator:
-  repetitions: 5
-  out_dir: "./experiments/find_rudimentary_r_tau/bigreal/Freebase/twins"
+  repetitions: 10
+  out_dir: "./experiments/experiment_d/bigreal/Freebase/twins"
