@@ -36,7 +36,9 @@ def _parse_adj_mats(network_dir: str, binary: bool, thresh: float | None) -> dic
     return layers
 
 
-def _parse_edgelists(edgelists: dict[str, nx.Graph]) -> tuple[list[str], list[nx.Graph]]:
+def _parse_edgelists(
+    edgelists: dict[str, nx.Graph],
+) -> tuple[list[str], list[nx.Graph]]:
     """Convert dict of edgelists to dict of nx.Graphs."""
     l_names, l_graphs = [], []
     for l_name, l_edge_list in edgelists.items():

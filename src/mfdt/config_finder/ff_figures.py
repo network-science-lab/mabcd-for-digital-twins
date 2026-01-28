@@ -15,7 +15,7 @@ from skopt.utils import OptimizeResult
 def _plot_trajectory(ax: Axes, result: OptimizeResult) -> Axes:
     plot_convergence(("gp_min", result), ax=ax)
     best_step = np.where(result.func_vals == result.fun)[0][0].item() + 1
-    x = np.arange(start=1, stop=len(result.func_vals)+1, step=1)
+    x = np.arange(start=1, stop=len(result.func_vals) + 1, step=1)
     ax.plot(
         x,
         result.func_vals,
@@ -45,7 +45,6 @@ def _plot_trajectory(ax: Axes, result: OptimizeResult) -> Axes:
 
 
 def _plot_mesh(ax: Axes, result: "OptimizeResult") -> Axes:
-
     # Project solution space to 2D using PCA
     pca = PCA(n_components=2)
     r_2d = pca.fit_transform(result.x_iters)

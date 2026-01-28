@@ -29,7 +29,9 @@ def partitions_correlation(
     nodes_partitions = {node: [] for node in graph_1.nodes}
     for community_label, community_set in enumerate(graph_1_partitions):
         for node in community_set:
-            if node not in nodes_partitions: #if communities for graph before destructive alignment were provided
+            if (
+                node not in nodes_partitions
+            ):  # if communities for graph before destructive alignment were provided
                 continue
             nodes_partitions[node].append(community_label)
     for community_label, community_set in enumerate(graph_2_partitions):

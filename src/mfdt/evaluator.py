@@ -3,6 +3,7 @@
 import json
 import pandas as pd
 import numpy as np
+from datetime import datetime
 from typing import Any
 from scipy.stats import kstest
 
@@ -16,9 +17,7 @@ from mfdt.config_finder.basic_finder import (
 )
 
 
-def divergence_R_edges_correlation(
-    original: Network, twin: Network, **kwargs
-) -> np.float64:
+def divergence_R_edges_correlation(original: Network, twin: Network, **kwargs) -> np.float64:
     """
     Calculate the divergence score for edges correlation matrices R of the original and twin networks.
     """
@@ -29,9 +28,7 @@ def divergence_R_edges_correlation(
     return np.sqrt(rss / (l * (l - 1)))
 
 
-def divergence_tau_degrees_correlation(
-    original: Network, twin: Network, **kwargs
-) -> np.float64:
+def divergence_tau_degrees_correlation(original: Network, twin: Network, **kwargs) -> np.float64:
     """
     Calculate the divergence score for degree correlation matrices of the original and twin networks.
     """
@@ -58,9 +55,7 @@ def divergence_r_communities_correlation(
     return np.sqrt(rss / (l * (l - 1)))
 
 
-def divergence_gamma_degree_distribution(
-    original: Network, twin: Network, **kwargs
-) -> np.float64:
+def divergence_gamma_degree_distribution(original: Network, twin: Network, **kwargs) -> np.float64:
     """
     Calculate the divergence score for degree distributions of the original and twin networks.
     """
@@ -87,7 +82,7 @@ def divergence_beta_community_sizes_distribution(
         twin_com_sizes_seq = [len(com) for com in twin_communities[l_name]]
         orig_com_sizes_seq = [len(com) for com in original_communities[l_name]]
         ks_distances += kstest(orig_com_sizes_seq, twin_com_sizes_seq).statistic
-    l = len(original.n_graph_nx.layers.keys())
+    l = len(twin.n_graph_nx.layers.keys())
     return ks_distances / l
 
 
@@ -142,7 +137,6 @@ def compute_error(
         twin_network.n_graph_nx.get_actors_num(),
         twin_network.n_graph_nx.get_layer_names(),
     )
-    # print([len(lc) for ln, lc in original_communities.items()])
     errors = {
         div: divergencies_calculators[div](
             original_network,
@@ -168,29 +162,27 @@ def get_original_network(on_path: str, lm_path: str) -> Network:
 
 def get_communities_all_layers(
     net: Network,
+    rng_seed: int | None = None,
 ) -> dict[str, list[set[Any]] | list[frozenset[Any]]]:
     """Cluster the network to use resulting partitions in evaluation."""
     return {
-        l_name: get_communities(l_graph)
+        l_name: get_communities(l_graph, rng_seed)
         for l_name, l_graph in net.n_graph_nx.layers.items()
     }
 
 
 def run_experiments(config: dict[str, Any]) -> None:
-
     out_dir = create_out_dir(config["evaluator"]["out_dir"])
     rng_seed = config["run"]["rng_seed"]
     divergencies = config["evaluator"]["divergencies"]
-    original_network = get_original_network(
-        config["original_network"], config["layer_map"]
-    )
+    original_network = get_original_network(config["original_network"], config["layer_map"])
     twin_networks = load_networks(networks=config["twin_networks"], device="cpu")
-    original_communities = get_communities_all_layers(original_network)
+    original_communities = get_communities_all_layers(original_network, rng_seed=rng_seed)
 
     print("Starting evaluation of the estimated configuration...")
     t_errors = {}
     for twin in twin_networks:
-        twin_communities = get_communities_all_layers(twin)
+        twin_communities = get_communities_all_layers(twin, rng_seed=rng_seed)
         t_error = compute_error(
             original_network=original_network,
             original_communities=original_communities,
@@ -198,11 +190,15 @@ def run_experiments(config: dict[str, Any]) -> None:
             twin_communities=twin_communities,
             divergencies=divergencies,
         )
-        t_error[twin.n_name] = t_error
+        t_errors[twin.n_name] = t_error
     # create dataframe from this dict
     df_errors = pd.DataFrame.from_dict(t_errors, orient="index")
     # add an entry with averaged errors over all the twins
-
+    df_errors["mean_divergence"] = np.mean(df_errors, axis=1)
+    mean_div = np.mean(df_errors, axis=0)
+    std_div = np.std(df_errors, axis=0)
+    df_errors.loc["Mean"] = mean_div
+    df_errors.loc["Std"] = std_div
     # save errors into the output directory
-
+    df_errors.to_csv(f"{out_dir}/divergence_scores_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
     print(f"Estimated configs saved.")

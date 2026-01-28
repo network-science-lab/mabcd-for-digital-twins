@@ -1,16 +1,15 @@
 run:
   experiment_type: "evaluate"
-  rng_seed: 43
+  rng_seed: 42
 
-original_network: "smallart^sf3"
-layer_map: "./examples/find/smallart/sf3/lmap.json"
+original_network: "bigreal^Freebase"
+layer_map: "./experiments/find_rudimentary/bigreal/Freebase/lmap.json"
 twin_networks: [
-  "mabcd^./examples/find/smallart/sf3/logs/17/*",
-  # "mabcd^./examples/find/smallart/sf3/logs/9/0_eval_edges.dat",
+  "mabcd^./experiments/find_rudimentary/bigreal/Freebase/twins/twin_edges*",
 ]
 
 evaluator:
-  out_dir: "./examples/evaluate"
+  out_dir: "./experiments/find_rudimentary/bigreal/Freebase/evaluate"
   divergencies: [
     "R_edges_correlation",
     "tau_degrees_correlation",

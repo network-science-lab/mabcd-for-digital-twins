@@ -51,6 +51,7 @@ class MLNConfig(BaseMLNConfig):
     are normalized while others are not. If an object of this class is used along with
     MLNABCDGraphGenerator, it implicitly converts its parameters to meet Julia's format and ranges.
     """
+
     seed: int | None
     n: int
     edges_cor: pd.DataFrame
@@ -145,9 +146,9 @@ class MLNConfig(BaseMLNConfig):
         lp_df["Delta"] = (lp_df["Delta"] * lp_df["_q"]).round(0).astype(int)
         lp_df["s"] = (lp_df["s"] * lp_df["_q"]).round(0).astype(int)
         lp_df["S"] = (lp_df["S"] * lp_df["_q"]).round(0).astype(int)
-        lp_df[
-            ["q", "tau", "r", "gamma", "delta", "Delta", "beta", "s", "S", "xi"]
-        ].to_csv(layer_params_path, index=False)
+        lp_df[["q", "tau", "r", "gamma", "delta", "Delta", "beta", "s", "S", "xi"]].to_csv(
+            layer_params_path, index=False
+        )
 
 
 class MLNABCDGraphGenerator:
@@ -171,9 +172,8 @@ class MLNABCDGraphGenerator:
         # disable prints as they're so annoying
         oldstdout = jl.stdout
         jl.redirect_stdout(jl.devnull)
-                
-        with tempfile.TemporaryDirectory() as tmpdir:
 
+        with tempfile.TemporaryDirectory() as tmpdir:
             # Save dataframes into temp dir
             edges_path = str(Path(tmpdir) / self.edges_filename)
             layers_path = str(Path(tmpdir) / self.layers_filename)
@@ -226,16 +226,15 @@ class MLNABCDGraphGenerator:
 
             # Save communities to file
             jl.MLNABCDGraphGenerator.write_communities(config, coms)
-    
+
         # enable the output again
         jl.redirect_stdout(oldstdout)
 
 
 if __name__ == "__main__":
-
     import yaml
     from pathlib import Path
-    
+
     out_dir = Path("./examples/generate")
     out_dir.mkdir(exist_ok=True, parents=True)
 
@@ -254,7 +253,7 @@ if __name__ == "__main__":
             "S": [0.0320, 0.0427, 0.0640, 0.1280],
             "xi": [0.2, 0.2, 0.2, 0.1],
         }
-    )                                   
+    )
     edges_cor = MLNConfig.get_edges_cor(
         [
             [1.0, 0.15, 0.15, 0.12],

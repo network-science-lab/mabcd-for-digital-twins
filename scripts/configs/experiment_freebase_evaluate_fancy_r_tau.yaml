@@ -2,11 +2,10 @@ run:
   experiment_type: "evaluate"
   rng_seed: 43
 
-original_network: "smallart^sf3"
+original_network: "bigreal^Freebase"
 layer_map: "./examples/find/smallart/sf3/lmap.json"
 twin_networks: [
   "mabcd^./examples/find/smallart/sf3/logs/17/*",
-  # "mabcd^./examples/find/smallart/sf3/logs/9/0_eval_edges.dat",
 ]
 
 evaluator:

@@ -63,7 +63,9 @@ def load_networks(networks: list[str], device: str) -> list[Network]:
     for net_regex in networks:
         net_type, net_name = net_regex.split(SEPARATOR)
         print(f"Loading network(s): {net_type} - {net_name}")
-        for (net_type, net_name), net_graph in load_network(net_type=net_type, net_name=net_name).items():
+        for (net_type, net_name), net_graph in load_network(
+            net_type=net_type, net_name=net_name
+        ).items():
             # print("\tconverting to PyTorch")
             nets.append(
                 Network(

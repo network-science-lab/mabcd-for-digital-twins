@@ -42,7 +42,7 @@ def prepare_objective(
     """
     Prepare the objective function to estimate r for given real network.
 
-    :param fixed_mabcd_params: found parameters of mABCD that are going to be fixed 
+    :param fixed_mabcd_params: found parameters of mABCD that are going to be fixed
     :param A: found interlayer community 'correlation' matrix
     :param r_space: decision variables with their ranges (i.e., r)
     :param nb_twins: numer of times to create candidate twin network to reduce noise
@@ -60,7 +60,6 @@ def prepare_objective(
 
     @skopt.utils.use_named_args(dimensions=decision_space)
     def objective(**decision_vars) -> float:
-
         # prepare fully fledged candidate configuraiton to evaluate
         candidate_config = copy.deepcopy(fixed_dict)
         candidate_config["seed"] = int(seed_generator.random() * 279)
@@ -78,14 +77,12 @@ def prepare_objective(
         # repreat twinning process n times to reduce noise
         A_primes = []
         with out_dir_server() as tmpdir:
-
             # create config according to the twin will be generated
             mln_config = MLNConfig.from_yaml(candidate_config)
             with open(f"{tmpdir}/eval_config.yaml", "w", encoding="utf-8") as f:
                 yaml.dump(mln_config.to_yaml(), f, sort_keys=False, indent=4)
 
             for rep in range(nb_twins):
-
                 # replace out paths according to sample number
                 rep_ef = Path(tmpdir) / f"{rep}_{candidate_config['edges_filename']}"
                 rep_cf = Path(tmpdir) / f"{rep}_{candidate_config['communities_filename']}"
@@ -103,14 +100,14 @@ def prepare_objective(
             # save computed A matrices in the sample
             A_primes = np.array(A_primes)
             np.save(f"{tmpdir}/A_primes.npy", A_primes)
-        
+
         # average the sample, compute distance from the real network and return it as a loss
         std_A_primes = get_stacked_A_element_variance(A_primes)
         A_prime = np.mean(A_primes, axis=0)
         loss = criterium(A, A_prime)
         print("loss: %.5f" % loss, "std_A': %.5f" % std_A_primes, "dv: ", decision_vars)
         return loss
-    
+
     return objective
 
 
@@ -129,7 +126,7 @@ def estimate_config_fancy(
     eps: float,
     d: int,
     seed: int | None = None,
-) -> tuple[dict[str, int], BaseMLNConfig]:
+) -> tuple[dict[str, str], BaseMLNConfig]:
     """
     Estimate configuration for given network using optimisation mechanisms.
 
@@ -178,7 +175,8 @@ def estimate_config_fancy(
     print(
         f"[BEST SOLUTION in {np.where(result.func_vals == result.fun)[0][0].item() + 1}th step] ",
         "loss: %.5f" % result.fun,
-        "dv: ", {dv.name: x for (dv, x) in zip(decision_space, result.x)}
+        "dv: ",
+        {dv.name: x for (dv, x) in zip(decision_space, result.x)},
     )
 
     if log_dir:

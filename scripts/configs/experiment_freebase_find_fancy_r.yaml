@@ -1,0 +1,22 @@
+run:
+  experiment_type: "find"
+  rng_seed: 42
+
+networks: ["bigreal^Freebase"]
+
+finder:
+  out_dir: "./experiments/find_fancy_r"
+  method: 
+    name: "fancy"
+    params:
+      save_logs: True
+      criterium: dummy
+      decision_variables: ["r"]
+      cap_fixed_params: False
+      nb_twins: 4
+      nb_steps: 20
+      d_max_iter: 1000
+      c_max_iter: 1000
+      t: 100
+      eps: 0.05
+      d: 2

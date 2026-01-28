@@ -1,7 +1,5 @@
 """Functions to read networks according to MLNABCD formatting."""
 
-# TODO: decide if this script is needed at all
-
 from pathlib import Path
 
 import networkx as nx
