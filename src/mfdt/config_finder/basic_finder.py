@@ -194,8 +194,8 @@ def get_layer_params(net: nd.MultilayerNetwork, seed: int | None = None) -> pd.D
     nb_actors = net.get_actors_num()
     for l_name, l_graph in net.layers.items():
         q[l_name] = get_q(l_graph, nb_actors)
-        gamma_delta_Delta[l_name] = get_gamma_delta_Delta(l_graph)
-        beta_s_S_xi[l_name] = get_beta_s_S_xi(l_graph)
+        gamma_delta_Delta[l_name] = get_gamma_delta_Delta(l_graph, cap_estimates=True)
+        beta_s_S_xi[l_name] = get_beta_s_S_xi(l_graph, cap_estimates=True)
 
     tau = get_tau(net, alpha=None)
     r = get_r(net, seed=seed)
