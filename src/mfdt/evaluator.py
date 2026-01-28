@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from typing import Any
 
-from mfdt.config_finder.cr_helpers import get_communities
+from mfdt.correlations.cr_helpers import get_communities
 from mfdt.divergences import (
     divergence_R_edges_correlation,
     divergence_beta_community_sizes_distribution,

@@ -1,10 +1,14 @@
+"""Correlations of various metrics between layers."""
+
 from typing import Any
 
 import networkx as nx
+import network_diffusion as nd
+import pandas as pd
 from scipy.stats import kendalltau
 from sklearn.metrics import adjusted_mutual_info_score
 
-from mfdt.config_finder.cr_helpers import get_communities
+from mfdt.correlations import cr_helpers
 
 
 def partitions_correlation(
@@ -20,10 +24,10 @@ def partitions_correlation(
 
     # obtain partitions in each graph
     if not graph_1_partitions:
-        graph_1_partitions = get_communities(graph_1, seed)
+        graph_1_partitions = cr_helpers.get_communities(graph_1, seed)
 
     if not graph_2_partitions:
-        graph_2_partitions = get_communities(graph_2, seed)
+        graph_2_partitions = cr_helpers.get_communities(graph_2, seed)
 
     # create dict keyed by nodes' ids, valued by array with partitions they're assigned into
     nodes_partitions = {node: [] for node in graph_1.nodes}
@@ -50,6 +54,23 @@ def partitions_correlation(
     return float(adjusted_mutual_info_score(partition_1_idcs, partition_2_idcs))
 
 
+def get_partitions_cor(net: nd.MultilayerNetwork, partitions: dict[str, list[set]]) -> pd.DataFrame:
+    """Get correlation (AMI) matrix for partitions."""
+    partitions_cor_raw = []
+    for la_name, lb_name in cr_helpers.prepare_layer_pairs(list(net.layers.keys())):
+        aligned_layers = cr_helpers.align_layers(net, la_name, lb_name, "destructive")
+        partitions_stat = partitions_correlation(
+            aligned_layers[la_name],
+            aligned_layers[lb_name],
+            graph_1_partitions=partitions[la_name],
+            graph_2_partitions=partitions[lb_name],
+            seed=42,
+        )
+        partitions_cor_raw.append({(la_name, lb_name): partitions_stat})
+    partitions_cor_df = cr_helpers.create_correlation_matrix(partitions_cor_raw)
+    return partitions_cor_df.round(3).fillna(0.0)
+
+
 def edges_r(graph_1: nx.Graph, graph_2: nx.Graph) -> float | None:
     g1_edges = set(graph_1.edges)
     g2_edges = set(graph_2.edges)
@@ -58,13 +79,15 @@ def edges_r(graph_1: nx.Graph, graph_2: nx.Graph) -> float | None:
     return len(g1_edges.intersection(g2_edges)) / min(len(g1_edges), len(g2_edges))
 
 
-def _degree_seq_ordered_by_labels(
-    graph: nx.Graph,
-    nodes_to_labels: dict[Any, int],
-) -> list[int]:
-    """Get degree sequence ordered by nodes' labels."""
-    labels_degree_seq = [(nodes_to_labels[n], d) for n, d in graph.degree()]
-    return [d for _, d in sorted(labels_degree_seq, key=lambda x: x[0])]
+def get_edges_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
+    """Get correlation matrix for edges (R)."""
+    edges_cor_raw = []
+    for la_name, lb_name in cr_helpers.prepare_layer_pairs(list(net.layers.keys())):
+        aligned_layers = cr_helpers.align_layers(net, la_name, lb_name, "destructive")
+        edges_stat = edges_r(aligned_layers[la_name], aligned_layers[lb_name])
+        edges_cor_raw.append({(la_name, lb_name): edges_stat})
+    edges_cor_df = cr_helpers.create_correlation_matrix(edges_cor_raw)
+    return edges_cor_df.round(3).fillna(0.0)
 
 
 def degrees_correlation(
@@ -77,8 +100,8 @@ def degrees_correlation(
         raise ValueError("Graphs must have identical node sets.")
 
     # obtain ranked degree sequences
-    ranked_deg_seq_1 = _degree_seq_ordered_by_labels(graph_1, nodes_to_labels)
-    ranked_deg_seq_2 = _degree_seq_ordered_by_labels(graph_2, nodes_to_labels)
+    ranked_deg_seq_1 = cr_helpers._degree_seq_ordered_by_labels(graph_1, nodes_to_labels)
+    ranked_deg_seq_2 = cr_helpers._degree_seq_ordered_by_labels(graph_2, nodes_to_labels)
 
     # compute kendall tau correlation and return it
     return float(
@@ -87,5 +110,19 @@ def degrees_correlation(
             ranked_deg_seq_2,
             nan_policy="raise",
             variant="b",
-        ).correlation
+        ).correlation  # FIXME!
     )
+
+
+def get_degrees_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
+    """Get correlation (Kendall tau) matrix for degrees."""
+    nodes_to_labels = cr_helpers._label_nodes_by_total_degree(net)
+    degrees_cor_raw = []
+    for la_name, lb_name in cr_helpers.prepare_layer_pairs(list(net.layers.keys())):
+        aligned_layers = cr_helpers.align_layers(net, la_name, lb_name, "destructive")
+        degrees_stat = degrees_correlation(
+            aligned_layers[la_name], aligned_layers[lb_name], nodes_to_labels
+        )
+        degrees_cor_raw.append({(la_name, lb_name): degrees_stat})
+    degrees_cor_df = cr_helpers.create_correlation_matrix(degrees_cor_raw)
+    return degrees_cor_df.round(3).fillna(0.0)

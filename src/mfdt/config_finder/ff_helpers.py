@@ -14,13 +14,12 @@ from skopt.utils import OptimizeResult
 
 from mfdt.config_finder.basic_finder import (
     get_beta_s_S_xi,
-    get_edges_cor,
     get_gamma_delta_Delta,
     get_q,
     get_r,
     get_tau,
 )
-from mfdt.config_finder import correlations, cr_helpers
+from mfdt.correlations import correlations, cr_helpers
 from mfdt.params_handler import create_out_dir
 from mfdt.mln_abcd.julia_wrapper import BaseMLNConfig
 
@@ -35,7 +34,7 @@ def estimate_fixed_params(
     """Estimate fixed parameters of the network that will not be searched with skopt."""
     l_map = {l_name: str(l_idx) for l_idx, l_name in enumerate(sorted(net.layers), 1)}
     n = net.get_actors_num()
-    edges_cor = get_edges_cor(net=net)
+    edges_cor = correlations.get_edges_cor(net=net)
 
     q, gamma_delta_Delta, beta_s_S_xi = {}, {}, {}
     for l_name, l_graph in net.layers.items():

@@ -1,20 +1,15 @@
 """Evaluate how well the parameters of mABCD have been found for the given network."""
 
-import json
-import pandas as pd
 import numpy as np
-from datetime import datetime
-from typing import Any
 from scipy.stats import kstest
 
-from mfdt.config_finder.cr_helpers import get_communities
-from mfdt.params_handler import Network, load_networks, create_out_dir
-from mfdt.config_finder.basic_finder import (
+from mfdt.correlations.correlations import (
     get_edges_cor,
     get_partitions_cor,
     get_degrees_cor,
-    _avg_partitions_noise,
 )
+from mfdt.config_finder.basic_finder import avg_partitions_noise
+from mfdt.params_handler import Network
 
 
 def divergence_R_edges_correlation(original: Network, twin: Network, **kwargs) -> np.float64:
@@ -97,11 +92,11 @@ def divergence_xi_intercommunity_noise(
     """
     xi_rss = 0.0
     for l_name, _ in original.n_graph_nx.layers.items():
-        xi_original = _avg_partitions_noise(
+        xi_original = avg_partitions_noise(
             original.n_graph_nx.layers[l_name], original_communities[l_name]
         )
         twin_l_graph = twin.n_graph_nx.layers[l_name]
-        xi_twin = _avg_partitions_noise(twin_l_graph, twin_communities[l_name])
+        xi_twin = avg_partitions_noise(twin_l_graph, twin_communities[l_name])
         xi_rss += (xi_original - xi_twin) ** 2
     l = len(original.n_graph_nx.layers.keys())
     return np.sqrt(xi_rss / l)
