@@ -75,17 +75,29 @@ def _plot_mesh(ax: Axes, result: "OptimizeResult") -> Axes:
         np.column_stack([x_mesh.ravel(), y_mesh.ravel()])
     ).reshape(x_mesh.shape)
 
+    vals = z_mesh[np.isfinite(z_mesh)]
+    vals_pos = vals[vals > 0]
+
+    low = np.percentile(vals_pos, 2)
+    high = np.percentile(vals_pos, 98)
+    margin = 0.25
+
+    vmin = low / (1 + margin)
+    vmax = high * (1 + margin)
+    z_plot = np.clip(z_mesh, vmin, vmax)
+
     # Plot interpolated loss landscape
     mesh = ax.pcolormesh(
         x_mesh,
         y_mesh,
-        z_mesh,
+        z_plot,
         norm=LogNorm(
-            vmin=np.nanmin(z_mesh),
-            vmax=np.nanmax(z_mesh),
+            vmin=vmin,
+            vmax=vmax,
         ),
         cmap="viridis_r",
         shading="auto",
+        rasterized=True,
     )
     ax.figure.colorbar(mesh, ax=ax, label="loss")
 
@@ -101,7 +113,7 @@ def _plot_mesh(ax: Axes, result: "OptimizeResult") -> Axes:
         loc='lower center',
         ncol=4,
         frameon=False,
-        bbox_to_anchor=(0.5, -0.4),
+        bbox_to_anchor=(0.5, -0.3),
     )
 
     # Plot optimisation trajectory arrows
@@ -126,7 +138,6 @@ def _plot_mesh(ax: Axes, result: "OptimizeResult") -> Axes:
     return ax
 
 
-# TODO: CONSIDER MOVING PLOT/TABLE GENERATION TO NOTEBOOK
 def plot_optimisation_process(result: OptimizeResult, out_dir: Path) -> None:
     """Plot the optimisation process for a skopt result."""
     fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(9, 4))
@@ -135,13 +146,17 @@ def plot_optimisation_process(result: OptimizeResult, out_dir: Path) -> None:
     ax[1] = _plot_mesh(ax[1], result)
     fig.tight_layout()
     fig.savefig(out_dir, dpi=300)
+    fig.savefig(out_dir.parent / "trajectory.png", dpi=300)
+    fig.savefig(out_dir.parent / "trajectory.pdf", dpi=300, bbox_inches="tight", transparent=True,)
 
     fig, ax = plt.subplots(figsize=(9, 4))
     ax = _plot_trajectory(ax, result)
     fig.tight_layout()
     fig.savefig(out_dir.parent / 'only_trajectory.png', dpi=300)
+    fig.savefig(out_dir.parent / 'only_trajectory.pdf', dpi=300, bbox_inches="tight", transparent=True,)
 
     fig, ax = plt.subplots(figsize=(5, 4))
     ax = _plot_mesh(ax, result)
     fig.tight_layout()
     fig.savefig(out_dir.parent / 'only_mesh.png', dpi=300)
+    fig.savefig(out_dir.parent / 'only_mesh.pdf', dpi=300, bbox_inches="tight", transparent=True,)
