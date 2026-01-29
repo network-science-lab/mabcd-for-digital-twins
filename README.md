@@ -79,7 +79,7 @@ Experiment 2:
 
 Experiment 3:
 - exp_h: exp_b
-- exp_i: optimise [r, d]; loss [r]; d = 2
+- exp_i: optimise [r, d]; loss [r]
 
 ## Acknowledgment
 

@@ -34,7 +34,6 @@ rename_map = {
 }
 df["Divergence Metric"] = df["Divergence Metric"].replace(rename_map)
 
-# Plotting fancy
 ax = sns.barplot(
     data=df,
     x="Divergence Metric",
