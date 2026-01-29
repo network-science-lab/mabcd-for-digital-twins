@@ -35,7 +35,7 @@ def r_tau_loss(
     **kwargs,
 ) -> np.float64:
     """Sum of two div scores for r and tau."""
-    return r_loss(A, A_prime) + tau_loss(B, B_prime)
+    return (r_loss(A, A_prime) + tau_loss(B, B_prime)) / 2
 
 
 def get_criterium(name: str) -> Callable:

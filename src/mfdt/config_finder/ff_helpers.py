@@ -88,8 +88,8 @@ def get_decision_space(decision_variables: list[str], n_layers: int) -> list[Rea
     if "tau" in decision_variables:
         tau_space = [Real(0.0, 1.0, name=f"tau_{i}") for i in range(n_layers)]
         decision_space.extend(tau_space)
-    if "d" in decision_space:
-        d_space = [Integer(1, 4, name=f"r_{i}") for i in range(n_layers)]
+    if "d" in decision_variables:
+        d_space = [Integer(1, 4, name=f"d")]
         decision_space.extend(d_space)   
     return decision_space
 

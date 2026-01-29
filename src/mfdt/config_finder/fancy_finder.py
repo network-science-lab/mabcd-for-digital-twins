@@ -2,7 +2,7 @@
 
 import copy
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable
 
 import network_diffusion as nd
 import numpy as np
@@ -67,13 +67,16 @@ def prepare_objective(
         candidate_config["edges_filename"] = "eval_edges.dat"
         candidate_config["communities_filename"] = "eval_communities.dat"
 
-        # update evaluated values or r and tau depending on if the'yre fixed or decision vars
+        # update candidate config depending on the decision vars
         r_list = [decision_vars.get(f"r_{i}") for i in range(len(A))]
         if None not in r_list:
             candidate_config["layer_params"]["r"] = r_list
         tau_list = [decision_vars.get(f"tau_{i}") for i in range(len(A))]
         if None not in tau_list:
             candidate_config["layer_params"]["tau"] = tau_list
+        d = decision_vars.get("d")
+        if d:
+            candidate_config["d"] = int(d)
 
         # repreat twinning process n times to reduce noise
         A_primes, B_primes = [], []
@@ -130,11 +133,7 @@ def estimate_config_fancy(
     cap_fixed_params: bool,
     nb_twins: int,
     nb_steps: int,
-    d_max_iter: int,
-    c_max_iter: int,
-    t: int,
-    eps: float,
-    d: int,
+    mabcd_hyperparams: dict[str, Any],
     seed: int | None = None,
 ) -> tuple[dict[str, str], BaseMLNConfig]:
     """
@@ -167,11 +166,11 @@ def estimate_config_fancy(
         decision_space=decision_space,
         criterium=criterium_func,
         nb_twins=nb_twins,
-        d_max_iter=d_max_iter,
-        c_max_iter=c_max_iter,
-        t=t,
-        eps=eps,
-        d=d,
+        d_max_iter=mabcd_hyperparams["d_max_iter"],
+        c_max_iter=mabcd_hyperparams["c_max_iter"],
+        t=mabcd_hyperparams["t"],
+        eps=mabcd_hyperparams["eps"],
+        d=mabcd_hyperparams["d"],
         rng_seed=seed,
         out_dir=log_dir if save_logs else None,
     )
@@ -193,6 +192,7 @@ def estimate_config_fancy(
     if log_dir:
         plot_optimisation_process(result, log_dir / "trajectory.png")
         np.save(f"{log_dir}/A.npy", A)
+        np.save(f"{log_dir}/B.npy", B)
         with open(f"{log_dir}/optim.txt", "w", encoding="utf-8") as f:
             f.write(result.__str__())
         SerialOptimizeResult(
