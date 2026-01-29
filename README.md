@@ -66,23 +66,20 @@ of the mABCD parameters found by the finder.
 
 Finder experiments ():
 
-- exp_a: rudimentary
-- exp_b: fancy with [r] and d=2
-- exp_c: fancy with [r, tau] and d=2
-- exp_d: fancy with [r] and d=1
-- exp_e: fancy with [r] and d=4
-- exp_f: fancy with [r] and d=8
-- exp_g: fancy with [tau] and d=2
+Experiment 1:
+- exp_a: optimise [r]; loss [r]; d = 1
+- exp_b: optimise [r]; loss [r]; d = 2
+- exp_c: optimise [r]; loss [r]; d = 4
+- exp_d: optimise [r]; loss [r]; d = 8
 
-Twins generation:
+Experiment 2:
+- exp_e: optimise [r, tau]; loss [r]; d = 2
+- exp_f: optimise [r, tau]; loss [tau]; d = 2
+- exp_g: optimise [r, tau]; loss [r+tau]; d = 2
 
-- experiment_d: rudimentary d = {1,2,4,8} and fancy d = {1,2,4,8}
-- experiment_finder_method: rudimentary, fancy with [t, tau], fancy with [r], fancy with [tau], d=2
-
-Evaluation experiments:
-
-- experiment_d: rudimentary d = {1,2,4,8} and fancy d = {1,2,4,8}
-- experiment_finder_method: rudimentary, fancy with [t, tau], fancy with [r], fancy with [tau], d=2
+Experiment 3:
+- exp_h: exp_b
+- exp_i: optimise [r, d]; loss [r]; d = 2
 
 ## Acknowledgment
 

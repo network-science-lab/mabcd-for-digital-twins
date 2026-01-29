@@ -1,4 +1,5 @@
 from copy import deepcopy
+import functools
 from itertools import combinations
 from typing import Any, Literal
 
@@ -55,6 +56,31 @@ def get_degree_sequence(net: nd.MultilayerNetwork) -> pd.DataFrame:
     return pd.DataFrame(net_degrees).T
 
 
+def _degree_seq_ordered_by_labels(
+    graph: nx.Graph,
+    nodes_to_labels: dict[Any, int],
+) -> list[int]:
+    """Get degree sequence ordered by nodes' labels."""
+    labels_degree_seq = [(nodes_to_labels[n], d) for n, d in graph.degree()]  # FIXME!
+    return [d for _, d in sorted(labels_degree_seq, key=lambda x: x[0])]
+
+
+def _label_nodes_by_total_degree(net: nd.MultilayerNetwork) -> dict[Any, int]:
+    """Label nodes according to their total degree across all layers."""
+    nodes_total_degree = {}
+    for layer in net.layers.values():
+        for n, d in layer.degree():  # FIXME!
+            nodes_total_degree[n] = nodes_total_degree.get(n, 0) + d
+    nodes_to_labels = {
+        e[0]: idx
+        for idx, e in enumerate(
+            sorted(nodes_total_degree.items(), key=lambda x: x[1], reverse=True)
+        )
+    }
+    return nodes_to_labels
+
+
+@functools.lru_cache(maxsize=500, typed=False)
 def get_communities(net: nx.Graph, seed: int | None = 42) -> list[set[Any]] | list[frozenset[Any]]:
     """A unified method for communities retrieval; use this in the repo for coherence."""
     # partitions = nx.community.louvain_communities(net, seed=seed)

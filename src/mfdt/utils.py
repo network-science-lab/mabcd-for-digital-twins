@@ -1,3 +1,5 @@
+# TODO: merge entirely with params_handler
+
 import datetime
 import warnings
 

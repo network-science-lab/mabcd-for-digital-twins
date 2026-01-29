@@ -9,18 +9,17 @@ from typing import Callable
 import network_diffusion as nd
 import numpy as np
 import pandas as pd
-from skopt.space import Real
+from skopt.space import Real, Integer
 from skopt.utils import OptimizeResult
 
 from mfdt.config_finder.basic_finder import (
     get_beta_s_S_xi,
-    get_edges_cor,
     get_gamma_delta_Delta,
     get_q,
     get_r,
     get_tau,
 )
-from mfdt.config_finder import correlations, cr_helpers
+from mfdt.correlations import correlations
 from mfdt.params_handler import create_out_dir
 from mfdt.mln_abcd.julia_wrapper import BaseMLNConfig
 
@@ -35,7 +34,7 @@ def estimate_fixed_params(
     """Estimate fixed parameters of the network that will not be searched with skopt."""
     l_map = {l_name: str(l_idx) for l_idx, l_name in enumerate(sorted(net.layers), 1)}
     n = net.get_actors_num()
-    edges_cor = get_edges_cor(net=net)
+    edges_cor = correlations.get_edges_cor(net=net)
 
     q, gamma_delta_Delta, beta_s_S_xi = {}, {}, {}
     for l_name, l_graph in net.layers.items():
@@ -73,27 +72,11 @@ def estimate_fixed_params(
     return l_map, est_config
 
 
-def get_comm_ami(net: nd.MultilayerNetwork, seed: int | None = None) -> np.ndarray:
-    """Get interlatyer 'correlations' (i.e. AMI) between partitions."""
-    # net = net.to_multiplex()[0]  # TODO: decide if we need that?
-    part_cor_raw = []
-    for la_name, lb_name in cr_helpers.prepare_layer_pairs(list(net.layers.keys())):
-        aligned_layers = cr_helpers.align_layers(net, la_name, lb_name, "destructive")
-        part_ami = correlations.partitions_correlation(
-            aligned_layers[la_name],
-            aligned_layers[lb_name],
-            seed=seed,
-        )
-        part_cor_raw.append({(la_name, lb_name): part_ami})
-    part_cor_df = cr_helpers.create_correlation_matrix(part_cor_raw)  # .round(3).fillna(0.0)
-    return part_cor_df.to_numpy()
-
-
-def get_stacked_A_element_variance(stacked_A: np.ndarray) -> float:
+def get_stacked_arr_element_variance(stacked_arr: np.ndarray) -> float:
     """This variance measures stability of generated mABCD twins (the lower the better)."""
-    n_samples, n_dims, _ = stacked_A.shape  # n_dims == _
+    n_samples, n_dims, _ = stacked_arr.shape  # n_dims == _
     idx = np.tril_indices(n_dims, k=-1)
-    vals = stacked_A[:, idx[0], idx[1]]
+    vals = stacked_arr[:, idx[0], idx[1]]
     return vals.std(axis=0).mean().item()
 
 
@@ -105,30 +88,10 @@ def get_decision_space(decision_variables: list[str], n_layers: int) -> list[Rea
     if "tau" in decision_variables:
         tau_space = [Real(0.0, 1.0, name=f"tau_{i}") for i in range(n_layers)]
         decision_space.extend(tau_space)
+    if "d" in decision_variables:
+        d_space = [Integer(1, 4, name=f"d")]
+        decision_space.extend(d_space)   
     return decision_space
-
-
-def frobenius_loss(A: np.ndarray, A_p: np.ndarray) -> float:
-    """Frobenius loss."""
-    fro_A = np.linalg.norm(A, ord="fro")
-    fro_A_p = np.linalg.norm(A_p, ord="fro")
-    return np.abs(fro_A_p - fro_A).item()
-
-
-def dummy_loss(A: np.ndarray, A_p: np.ndarray) -> float:
-    """Mean difference between A and A_p elements under the lower triangle."""
-    d_A = np.abs(A_p - A)
-    idcs = np.tril_indices(d_A.shape[0], k=-1)
-    d_a = d_A[idcs[0], idcs[1]]  # d_A vals from the lower triangle without the diagonal
-    return 100 * d_a.mean().item()
-
-
-def get_criterium(name: str) -> Callable:
-    if name == "frobenius":
-        return frobenius_loss
-    elif name == "dummy":
-        return dummy_loss
-    raise ValueError("Unknown criterium name")
 
 
 def prepare_log_dir(out_dir: Path | None = None) -> Callable:

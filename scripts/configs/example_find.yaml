@@ -38,14 +38,14 @@ finder:
     name: "fancy"
     params:
       save_logs: True
-      criterium: dummy
-      decision_variables: ["r", "tau"]
-      # decision_variables: ["r"]
+      criterium: "r"  # "r", "tau", "r+tau", "dummy"
+      decision_variables: ["r", "tau"] # , "d"]
       cap_fixed_params: True  # False is faster
       nb_twins: 5
       nb_steps: 20
-      d_max_iter: 1000
-      c_max_iter: 1000
-      t: 100
-      eps: 0.05
-      d: 2
+      mabcd_hyperparams:  # ignored if in decision vars (currently only d)
+        d_max_iter: 1000
+        c_max_iter: 1000
+        t: 100
+        eps: 0.05
+        d: 2

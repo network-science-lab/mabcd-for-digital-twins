@@ -5,12 +5,11 @@ from typing import Any
 import juliacall  # this is added to silent a warning raised by importing both torch an juliacall
 import networkx as nx
 import network_diffusion as nd
-import numpy as np
 import pandas as pd
 import powerlaw
 from scipy.stats import kendalltau
 
-from mfdt.config_finder import correlations, cr_helpers
+from mfdt.correlations import correlations, cr_helpers
 from mfdt.mln_abcd.julia_wrapper import BaseMLNConfig
 
 
@@ -46,7 +45,7 @@ def get_tau(net: nd.MultilayerNetwork, alpha: float | None = 0.05) -> dict[str, 
             nan_policy="raise",
             variant="b",
         )
-        tau[l_name] = statistic.item() if (not alpha or pvalue < alpha) else 0.0
+        tau[l_name] = statistic.item() if (not alpha or pvalue < alpha) else 0.0  # FIXME!
 
     return tau
 
@@ -91,7 +90,7 @@ def _fit_exponent_powerlaw(raw_data: list[int] | list[float]) -> float:
 
 def get_gamma_delta_Delta(net: nx.Graph, cap_estimates: bool = False) -> dict[str, float]:
     """Get powerlaw exponent and min/max degree for a given layer."""
-    degrees = [d for _, d in net.degree()]
+    degrees = [d for _, d in net.degree()]  # FIXME!
     max_degree = max(degrees)
     min_degree = min(degrees) if not cap_estimates else max(min(degrees), 5)
     return {
@@ -101,7 +100,7 @@ def get_gamma_delta_Delta(net: nx.Graph, cap_estimates: bool = False) -> dict[st
     }
 
 
-def _avg_partitions_noise(
+def avg_partitions_noise(
     net: nx.Graph, partitions: list[set[Any]] | list[frozenset[Any]]
 ) -> float:
     """
@@ -126,65 +125,8 @@ def get_beta_s_S_xi(net: nx.Graph, cap_estimates: bool = False) -> dict[str, flo
         "beta": _fit_exponent_powerlaw(partitions_sizes),
         "s": min_ps / len(net.nodes),
         "S": max(partitions_sizes) / len(net.nodes),
-        "xi": _avg_partitions_noise(net, partitions),
+        "xi": avg_partitions_noise(net, partitions),
     }
-
-
-def get_edges_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
-    """Get correlation matrix for edges."""
-    edges_cor_raw = []
-    for la_name, lb_name in cr_helpers.prepare_layer_pairs(list(net.layers.keys())):
-        aligned_layers = cr_helpers.align_layers(net, la_name, lb_name, "destructive")
-        edges_stat = correlations.edges_r(aligned_layers[la_name], aligned_layers[lb_name])
-        edges_cor_raw.append({(la_name, lb_name): edges_stat})
-    edges_cor_df = cr_helpers.create_correlation_matrix(edges_cor_raw)
-    return edges_cor_df.round(3).fillna(0.0)
-
-
-def get_partitions_cor(net: nd.MultilayerNetwork, partitions: dict[str, list[set]]) -> pd.DataFrame:
-    """Get correlation (AMI) matrix for partitions."""
-    partitions_cor_raw = []
-    for la_name, lb_name in cr_helpers.prepare_layer_pairs(list(net.layers.keys())):
-        aligned_layers = cr_helpers.align_layers(net, la_name, lb_name, "destructive")
-        partitions_stat = correlations.partitions_correlation(
-            aligned_layers[la_name],
-            aligned_layers[lb_name],
-            graph_1_partitions=partitions[la_name],
-            graph_2_partitions=partitions[lb_name],
-            seed=42,
-        )
-        partitions_cor_raw.append({(la_name, lb_name): partitions_stat})
-    partitions_cor_df = cr_helpers.create_correlation_matrix(partitions_cor_raw)
-    return partitions_cor_df.round(3).fillna(0.0)
-
-
-def _label_nodes_by_total_degree(net: nd.MultilayerNetwork) -> dict[Any, int]:
-    """Label nodes according to their total degree across all layers."""
-    nodes_total_degree = {}
-    for layer in net.layers.values():
-        for n, d in layer.degree():
-            nodes_total_degree[n] = nodes_total_degree.get(n, 0) + d
-    nodes_to_labels = {
-        e[0]: idx
-        for idx, e in enumerate(
-            sorted(nodes_total_degree.items(), key=lambda x: x[1], reverse=True)
-        )
-    }
-    return nodes_to_labels
-
-
-def get_degrees_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
-    """Get correlation (Kendall tau) matrix for degrees."""
-    nodes_to_labels = _label_nodes_by_total_degree(net)
-    degrees_cor_raw = []
-    for la_name, lb_name in cr_helpers.prepare_layer_pairs(list(net.layers.keys())):
-        aligned_layers = cr_helpers.align_layers(net, la_name, lb_name, "destructive")
-        degrees_stat = correlations.degrees_correlation(
-            aligned_layers[la_name], aligned_layers[lb_name], nodes_to_labels
-        )
-        degrees_cor_raw.append({(la_name, lb_name): degrees_stat})
-    degrees_cor_df = cr_helpers.create_correlation_matrix(degrees_cor_raw)
-    return degrees_cor_df.round(3).fillna(0.0)
 
 
 def get_layer_params(net: nd.MultilayerNetwork, seed: int | None = None) -> pd.DataFrame:
@@ -194,8 +136,8 @@ def get_layer_params(net: nd.MultilayerNetwork, seed: int | None = None) -> pd.D
     nb_actors = net.get_actors_num()
     for l_name, l_graph in net.layers.items():
         q[l_name] = get_q(l_graph, nb_actors)
-        gamma_delta_Delta[l_name] = get_gamma_delta_Delta(l_graph)
-        beta_s_S_xi[l_name] = get_beta_s_S_xi(l_graph)
+        gamma_delta_Delta[l_name] = get_gamma_delta_Delta(l_graph, cap_estimates=True)
+        beta_s_S_xi[l_name] = get_beta_s_S_xi(l_graph, cap_estimates=True)
 
     tau = get_tau(net, alpha=None)
     r = get_r(net, seed=seed)
@@ -221,7 +163,7 @@ def estimate_config_rudimentarly(
     """Estimate configuration for given network in the barbarian way."""
     l_map = {l_name: str(l_idx) for l_idx, l_name in enumerate(sorted(net.layers), 1)}
     n = net.get_actors_num()
-    edges_cor = get_edges_cor(net=net)
+    edges_cor = correlations.get_edges_cor(net=net)
     edges_cor = edges_cor.rename(l_map, axis=0)
     edges_cor = edges_cor.rename(l_map, axis=1)
     layers_par = get_layer_params(net=net, seed=seed)
