@@ -5,9 +5,9 @@ from typing import Callable
 import numpy as np
 
 
-def dummy_loss(A: np.ndarray, A_p: np.ndarray, **kwargs) -> float:
+def dummy_loss(A: np.ndarray, A_prime: np.ndarray, **kwargs) -> float:
     """Mean difference between A and A_p elements under the lower triangle."""
-    d_A = np.abs(A_p - A)
+    d_A = np.abs(A_prime - A)
     idcs = np.tril_indices(d_A.shape[0], k=-1)
     d_a = d_A[idcs[0], idcs[1]]  # d_A vals from the lower triangle without the diagonal
     return 100 * d_a.mean().item()
