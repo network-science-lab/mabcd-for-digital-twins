@@ -1,6 +1,6 @@
 [project]
 name = "mfdt"
-version = "0.5.0"
+version = "0.5.1"
 description = "mABCD for Digital Twins (mfdt)"
 readme = "README.md"
 authors = [
@@ -25,6 +25,7 @@ dependencies = [
     "tqdm>=4.66.6",
     "scipy>=1.13.1",
     "seaborn>=0.13.2",
+    "umap-learn>=0.5.11",
 ]
 
 [project.scripts]
