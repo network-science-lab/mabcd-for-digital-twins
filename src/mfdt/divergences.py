@@ -9,6 +9,7 @@ from mfdt.correlations.correlations import (
     get_degrees_cor,
 )
 from mfdt.config_finder.basic_finder import avg_partitions_noise
+from mfdt.config_finder.ff_loss import tau_loss, r_loss
 from mfdt.params_handler import Network
 
 
@@ -29,9 +30,7 @@ def divergence_tau_degrees_correlation(original: Network, twin: Network, **kwarg
     """
     degrees_cor_mat_orig = get_degrees_cor(original.n_graph_nx)
     degrees_cor_mat_twin = get_degrees_cor(twin.n_graph_nx)
-    l = len(original.n_graph_nx.layers.keys())
-    rss = ((degrees_cor_mat_orig - degrees_cor_mat_twin) ** 2).values.sum()
-    return np.sqrt(rss / (4 * l * (l - 1)))
+    return tau_loss(B=degrees_cor_mat_orig.to_numpy(), B_prime=degrees_cor_mat_twin.to_numpy())
 
 
 def divergence_r_communities_correlation(
@@ -45,9 +44,7 @@ def divergence_r_communities_correlation(
     """
     edges_cor_mat_orig = get_partitions_cor(original.n_graph_nx, original_communities)
     edges_cor_mat_twin = get_partitions_cor(twin.n_graph_nx, twin_communities)
-    l = len(original.n_graph_nx.layers.keys())
-    rss = ((edges_cor_mat_orig - edges_cor_mat_twin) ** 2).values.sum()
-    return np.sqrt(rss / (l * (l - 1)))
+    return r_loss(A=edges_cor_mat_orig.to_numpy(), A_prime=edges_cor_mat_twin.to_numpy())
 
 
 def divergence_gamma_degree_distribution(original: Network, twin: Network, **kwargs) -> np.float64:

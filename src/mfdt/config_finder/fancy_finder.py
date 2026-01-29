@@ -14,12 +14,12 @@ from mfdt.config_finder.ff_helpers import (
     SerialOptimizeResult,
     convert_result,
     estimate_fixed_params,
-    get_comm_ami,
     get_decision_space,
-    get_stacked_A_element_variance,
-    get_criterium,
+    get_stacked_arr_element_variance,
     prepare_log_dir,
 )
+from mfdt.config_finder.ff_loss import get_criterium
+from mfdt.correlations.correlations import get_degrees_cor, get_partitions_cor
 from mfdt.loaders.net_loader import _prepare_network
 from mfdt.mln_abcd.julia_reader import load_edgelist
 from mfdt.mln_abcd.julia_wrapper import MLNABCDGraphGenerator, MLNConfig, BaseMLNConfig
@@ -28,6 +28,7 @@ from mfdt.mln_abcd.julia_wrapper import MLNABCDGraphGenerator, MLNConfig, BaseML
 def prepare_objective(
     fixed_mabcd_params: BaseMLNConfig,
     A: np.ndarray,
+    B: np.ndarray,
     decision_space: list[skopt.space.Real],
     criterium: Callable,
     nb_twins: int,
@@ -75,7 +76,7 @@ def prepare_objective(
             candidate_config["layer_params"]["tau"] = tau_list
 
         # repreat twinning process n times to reduce noise
-        A_primes = []
+        A_primes, B_primes = [], []
         with out_dir_server() as tmpdir:
             # create config according to the twin will be generated
             mln_config = MLNConfig.from_yaml(candidate_config)
@@ -93,19 +94,28 @@ def prepare_objective(
                 MLNABCDGraphGenerator()(config=mln_config)
                 twin = _prepare_network(load_edgelist(rep_ef))
 
-                # compute correlation matrix and append it to the sample
-                A_prime_n = get_comm_ami(net=twin, seed=rng_seed)
+                # compute r correlation matrix and append it to the sample
+                A_prime_n = get_partitions_cor(net=twin, seed=rng_seed).to_numpy()
                 A_primes.append(A_prime_n)
 
-            # save computed A matrices in the sample
+                # compute tau correlation matrix and append it to the sample
+                B_prime_n = get_degrees_cor(net=twin).to_numpy()
+                B_primes.append(B_prime_n)
+
+            # save computed A, B matrices in the sample
             A_primes = np.array(A_primes)
             np.save(f"{tmpdir}/A_primes.npy", A_primes)
+            B_primes = np.array(B_primes)
+            np.save(f"{tmpdir}/B_primes.npy", B_primes)
 
         # average the sample, compute distance from the real network and return it as a loss
-        std_A_primes = get_stacked_A_element_variance(A_primes)
-        A_prime = np.mean(A_primes, axis=0)
-        loss = criterium(A, A_prime)
-        print("loss: %.5f" % loss, "std_A': %.5f" % std_A_primes, "dv: ", decision_vars)
+        loss = criterium(A=A, A_prime=A_primes.mean(axis=0), B=B, B_prime=B_primes.mean(axis=0))
+        print(
+            f"loss: {loss:.5f}, "
+            f"std_A': {get_stacked_arr_element_variance(A_primes):.5f}, "
+            f"std_B': {get_stacked_arr_element_variance(B_primes):.5f}, "
+            f"dv: {decision_vars}"
+        )
         return loss
 
     return objective
@@ -146,12 +156,14 @@ def estimate_config_fancy(
         cap_fixed_params=cap_fixed_params,
         seed=seed,
     )
-    A = get_comm_ami(net, seed)
+    A = get_partitions_cor(net, seed=seed).to_numpy()
+    B = get_degrees_cor(net).to_numpy()
     decision_space = get_decision_space(decision_variables, A.shape[0])
     criterium_func = get_criterium(criterium)
     objective = prepare_objective(
         fixed_mabcd_params=fixed_mabcd_params,
         A=A,
+        B=B,
         decision_space=decision_space,
         criterium=criterium_func,
         nb_twins=nb_twins,
@@ -174,9 +186,8 @@ def estimate_config_fancy(
     )
     print(
         f"[BEST SOLUTION in {np.where(result.func_vals == result.fun)[0][0].item() + 1}th step] ",
-        "loss: %.5f" % result.fun,
-        "dv: ",
-        {dv.name: x for (dv, x) in zip(decision_space, result.x)},
+        f"loss: {result.fun:.5f}, "
+        f"dv: ", {dv.name: x for (dv, x) in zip(decision_space, result.x)},
     )
 
     if log_dir:

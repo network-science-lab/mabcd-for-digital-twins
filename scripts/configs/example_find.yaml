@@ -38,9 +38,9 @@ finder:
     name: "fancy"
     params:
       save_logs: True
-      criterium: dummy
-      decision_variables: ["r", "tau"]
-      # decision_variables: ["r"]
+      criterium: "r"  # "r", "tau", "r+tau", "dummy"
+      # decision_variables: ["r", "tau"] # , "d"]
+      decision_variables: ["r"]
       cap_fixed_params: True  # False is faster
       nb_twins: 5
       nb_steps: 20

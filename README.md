@@ -94,3 +94,4 @@ TODO:
 - enrich logging to log diver. tau and r ALWAYS
 - add better loss choice
 - reorganise code
+- add D to the estimator!

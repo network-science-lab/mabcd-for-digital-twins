@@ -54,7 +54,11 @@ def partitions_correlation(
     return float(adjusted_mutual_info_score(partition_1_idcs, partition_2_idcs))
 
 
-def get_partitions_cor(net: nd.MultilayerNetwork, partitions: dict[str, list[set]]) -> pd.DataFrame:
+def get_partitions_cor(
+    net: nd.MultilayerNetwork,
+    partitions: dict[str, list[set]] | None = None,
+    seed: int | None = None,
+) -> pd.DataFrame:
     """Get correlation (AMI) matrix for partitions."""
     partitions_cor_raw = []
     for la_name, lb_name in cr_helpers.prepare_layer_pairs(list(net.layers.keys())):
@@ -62,13 +66,13 @@ def get_partitions_cor(net: nd.MultilayerNetwork, partitions: dict[str, list[set
         partitions_stat = partitions_correlation(
             aligned_layers[la_name],
             aligned_layers[lb_name],
-            graph_1_partitions=partitions[la_name],
-            graph_2_partitions=partitions[lb_name],
-            seed=42,
+            graph_1_partitions=None if not partitions else partitions[la_name],
+            graph_2_partitions=None if not partitions else partitions[lb_name],
+            seed=seed,
         )
         partitions_cor_raw.append({(la_name, lb_name): partitions_stat})
     partitions_cor_df = cr_helpers.create_correlation_matrix(partitions_cor_raw)
-    return partitions_cor_df.round(3).fillna(0.0)
+    return partitions_cor_df.fillna(0.0)
 
 
 def edges_r(graph_1: nx.Graph, graph_2: nx.Graph) -> float | None:
@@ -87,7 +91,7 @@ def get_edges_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
         edges_stat = edges_r(aligned_layers[la_name], aligned_layers[lb_name])
         edges_cor_raw.append({(la_name, lb_name): edges_stat})
     edges_cor_df = cr_helpers.create_correlation_matrix(edges_cor_raw)
-    return edges_cor_df.round(3).fillna(0.0)
+    return edges_cor_df.fillna(0.0)
 
 
 def degrees_correlation(
@@ -125,4 +129,4 @@ def get_degrees_cor(net: nd.MultilayerNetwork) -> pd.DataFrame:
         )
         degrees_cor_raw.append({(la_name, lb_name): degrees_stat})
     degrees_cor_df = cr_helpers.create_correlation_matrix(degrees_cor_raw)
-    return degrees_cor_df.round(3).fillna(0.0)
+    return degrees_cor_df.fillna(0.0)

@@ -1,4 +1,5 @@
 from copy import deepcopy
+import functools
 from itertools import combinations
 from typing import Any, Literal
 
@@ -79,7 +80,7 @@ def _label_nodes_by_total_degree(net: nd.MultilayerNetwork) -> dict[Any, int]:
     return nodes_to_labels
 
 
-# TODO: consider moving to root.utils
+@functools.lru_cache(maxsize=500, typed=False)
 def get_communities(net: nx.Graph, seed: int | None = 42) -> list[set[Any]] | list[frozenset[Any]]:
     """A unified method for communities retrieval; use this in the repo for coherence."""
     # partitions = nx.community.louvain_communities(net, seed=seed)

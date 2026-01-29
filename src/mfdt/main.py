@@ -24,8 +24,8 @@ def parse_args(*args):
         type=str,
         # default="scripts/configs/example_generate_1.yaml",
         # default="scripts/configs/example_generate_2/runner_config.yaml",
-        # default="scripts/configs/example_find.yaml",
-        default="scripts/configs/example_evaluate.yaml",
+        default="scripts/configs/example_find.yaml",
+        # default="scripts/configs/example_evaluate.yaml",
     )
     return parser.parse_args(*args)
 

@@ -1,6 +1,5 @@
 """A script with functions to facilitate loading simulation's parameters and input data."""
 
-import itertools
 import json
 import tempfile
 from dataclasses import dataclass
@@ -34,18 +33,6 @@ class Network:
         if _type == _name:
             return _type
         return f"{_type}{SEPARATOR}{_name}"
-
-
-def get_parameter_space(
-    protocols: list[str],
-    probabs: list[float],
-    seed_budgets: list[float],
-    ss_methods: list[str],
-    networks: list[tuple[str, str]],
-) -> list[tuple[str, tuple[float, float], float, tuple[str, str], str]]:
-    seed_budgets_full = [(100 - i, i) for i in seed_budgets]
-    p_space = itertools.product(protocols, seed_budgets_full, probabs, networks, ss_methods)
-    return list(p_space)
 
 
 def create_out_dir(out_dir: str | Path) -> Path:
