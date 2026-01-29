@@ -1,15 +1,25 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
+from glob import glob
 
-# Data preparation
-df = pd.read_csv(
-    "./data/evaluate/experiment_finder_method/bigreal/Freebase/divergence_scores.csv",
-    header=0,
+result_paths = glob(
+    "./data/evaluate/experiment_2/bigreal/Freebase/exp_*/divergence_scores.csv"
 )
-df = df.iloc[: df.shape[0] - 2, :]
+# Data preparation
+dfs = [
+    pd.read_csv(
+        path,
+        header=0,
+    )
+    for path in result_paths
+]
+for table, path in zip(dfs, result_paths):
+    table["Estimation Method"] = path.split("\\")[-2]
+
+df = pd.concat(dfs, ignore_index=True)
+df = df[~df.graph.isin(["Mean", "Std"])]
 df.drop(columns=["mean_divergence"], inplace=True)
-df["Estimation Method"] = df.graph.str.replace("Freebase-twin_edges_", "").str[:-2]
 df = df.melt(
     id_vars=["graph", "Estimation Method"],
     var_name="Divergence Metric",
@@ -24,10 +34,10 @@ metric_rename_map = {
     "xi_intercommunity_noise": "ξ",
 }
 method_rename_map = {
-    "fancy_r": "Advanced r",
-    "fancy_r_tau": "Advanced r+τ",
-    "fancy_tau": "Advanced τ",
-    "rudimentary": "Simple",
+    "exp_b": "Tuned r; loss r",
+    "exp_e": "Tuned r+τ; loss r",
+    "exp_f": "Tuned r+τ; loss τ",
+    "exp_g": "Tuned r+τ; loss r+τ",
 }
 df["Divergence Metric"] = df["Divergence Metric"].replace(metric_rename_map)
 df["Estimation Method"] = df["Estimation Method"].replace(method_rename_map)
@@ -38,10 +48,11 @@ ax = sns.barplot(
     y="value",
     hue="Estimation Method",
 )
+ax.set_yscale("log")
 ax.set_ylim(0, 1)
 plt.ylabel("Divergence Score")
 plt.xlabel("Divergence Metric")
 plt.savefig(
-    "./data/evaluate/experiment_finder_method/bigreal/Freebase/divergence_by_method.pdf"
+    "./data/evaluate/experiment_2/bigreal/Freebase/experiment_2_divergence_by_method.pdf"
 )
 plt.clf()
