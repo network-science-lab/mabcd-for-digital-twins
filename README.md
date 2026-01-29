@@ -73,13 +73,13 @@ Experiment 1:
 - exp_d: optimise [r]; loss [r]; d = 8
 
 Experiment 2:
-- exp_e: optimise [r, tau]; loss [r]
-- exp_f: optimise [r, tau]; loss [tau]
-- exp_g: optimise [r, tau]; loss [r+tau]
+- exp_e: optimise [r, tau]; loss [r]; d = 2
+- exp_f: optimise [r, tau]; loss [tau]; d = 2
+- exp_g: optimise [r, tau]; loss [r+tau]; d = 2
 
 Experiment 3:
 - exp_h: exp_b
-- exp_i: optimise [r, d]; loss [r]
+- exp_i: optimise [r, d]; loss [r]; d = 2
 
 ## Acknowledgment
 
