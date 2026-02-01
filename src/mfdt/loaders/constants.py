@@ -8,7 +8,6 @@ from typing import Callable
 
 import network_diffusion as nd
 
-
 MLN_RAW_DATA_PATH = Path(__file__).parent.parent.parent.parent / "data/networks"
 
 # network names

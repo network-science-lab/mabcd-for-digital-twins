@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-import networkx as nx
 import network_diffusion as nd
+import networkx as nx
 import pandas as pd
 
 

@@ -2,8 +2,8 @@
 
 import tempfile
 from dataclasses import dataclass
-from typing import Any
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -232,8 +232,9 @@ class MLNABCDGraphGenerator:
 
 
 if __name__ == "__main__":
-    import yaml
     from pathlib import Path
+
+    import yaml
 
     out_dir = Path("./examples/generate")
     out_dir.mkdir(exist_ok=True, parents=True)

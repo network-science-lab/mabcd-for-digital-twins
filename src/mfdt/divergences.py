@@ -3,13 +3,10 @@
 import numpy as np
 from scipy.stats import kstest
 
-from mfdt.correlations.correlations import (
-    get_edges_cor,
-    get_partitions_cor,
-    get_degrees_cor,
-)
 from mfdt.config_finder.basic_finder import avg_partitions_noise
-from mfdt.config_finder.ff_loss import tau_loss, r_loss
+from mfdt.config_finder.ff_loss import r_loss, tau_loss
+from mfdt.correlations.correlations import (get_degrees_cor, get_edges_cor,
+                                            get_partitions_cor)
 from mfdt.params_handler import Network
 
 

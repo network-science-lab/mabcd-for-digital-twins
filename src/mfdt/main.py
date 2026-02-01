@@ -5,14 +5,14 @@
 # TODO: in the camera-ready version, run black or other code formatter on the codebase
 
 import argparse
-import yaml
-import juliacall
 
+import juliacall
+import yaml
 from network_diffusion.utils import set_rng_seed
 
-from mfdt.generator import run_experiments as re_generator
-from mfdt.finder import run_experiments as re_finder
 from mfdt.evaluator import run_experiments as re_evaluator
+from mfdt.finder import run_experiments as re_finder
+from mfdt.generator import run_experiments as re_generator
 
 
 def parse_args(*args):

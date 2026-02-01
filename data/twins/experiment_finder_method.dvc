@@ -1,6 +1,0 @@
-outs:
-- md5: 6ca0621f5565c2ac6c76aa249629d52c.dir
-  size: 15236699
-  nfiles: 86
-  hash: md5
-  path: experiment_finder_method
