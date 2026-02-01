@@ -2,8 +2,8 @@
 
 from typing import Any
 
-import networkx as nx
 import network_diffusion as nd
+import networkx as nx
 import pandas as pd
 from scipy.stats import kendalltau
 from sklearn.metrics import adjusted_mutual_info_score

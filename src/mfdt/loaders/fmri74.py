@@ -1,11 +1,11 @@
 """Loader the network of fMRI scans of 74 healthy women in resting-state."""
 
 from pathlib import Path
-from tqdm import tqdm
 
-import networkx as nx
 import network_diffusion as nd
+import networkx as nx
 import pandas as pd
+from tqdm import tqdm
 
 
 def _parse_adj_mats(network_dir: str, binary: bool, thresh: float | None) -> dict[str, nx.Graph]:

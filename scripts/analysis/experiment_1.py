@@ -1,8 +1,7 @@
-from plot_utils import load_multiple_divergence_scores, translate_fields, save_divergence_plot
+from plot_utils import (load_multiple_divergence_scores, save_divergence_plot,
+                        translate_fields)
 
-experiment_results_glob = (
-    "./data/evaluate/experiment_1/bigreal/Freebase/d*/divergence_scores.csv"
-)
+experiment_results_glob = "./data/evaluate/experiment_1/bigreal/Freebase/d*/divergence_scores.csv"
 df = load_multiple_divergence_scores(experiment_results_glob)
 df["d"] = df["results_path"].apply(lambda path: path.split("\\")[-2][1:])
 df.drop(columns=["results_path"], inplace=True)

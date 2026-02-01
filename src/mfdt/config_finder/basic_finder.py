@@ -3,8 +3,8 @@
 from typing import Any
 
 import juliacall  # this is added to silent a warning raised by importing both torch an juliacall
-import networkx as nx
 import network_diffusion as nd
+import networkx as nx
 import pandas as pd
 import powerlaw
 from scipy.stats import kendalltau
@@ -100,9 +100,7 @@ def get_gamma_delta_Delta(net: nx.Graph, cap_estimates: bool = False) -> dict[st
     }
 
 
-def avg_partitions_noise(
-    net: nx.Graph, partitions: list[set[Any]] | list[frozenset[Any]]
-) -> float:
+def avg_partitions_noise(net: nx.Graph, partitions: list[set[Any]] | list[frozenset[Any]]) -> float:
     """
     The noise is fraction of edges inside partitions to number of all edges in the graph.
 

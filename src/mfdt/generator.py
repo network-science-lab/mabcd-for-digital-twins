@@ -7,7 +7,7 @@ import numpy as np
 import yaml
 from tqdm import tqdm
 
-from mfdt.mln_abcd.julia_wrapper import MLNConfig, MLNABCDGraphGenerator
+from mfdt.mln_abcd.julia_wrapper import MLNABCDGraphGenerator, MLNConfig
 from mfdt.params_handler import create_out_dir
 
 

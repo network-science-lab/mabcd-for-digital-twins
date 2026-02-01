@@ -2,19 +2,9 @@
 
 import network_diffusion as nd
 
-from mfdt.loaders.constants import (
-    MLN_RAW_DATA_PATH,
-    ER1,
-    ER2,
-    ER3,
-    ER5,
-    SF1,
-    SF2,
-    SF3,
-    SF5,
-    WILDCARD_ALL,
-    return_some_layers,
-)
+from mfdt.loaders.constants import (ER1, ER2, ER3, ER5, MLN_RAW_DATA_PATH, SF1,
+                                    SF2, SF3, SF5, WILDCARD_ALL,
+                                    return_some_layers)
 
 
 def get_er2_network() -> nd.MultilayerNetwork:

@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.colors import LogNorm
 from scipy.interpolate import RBFInterpolator
@@ -71,9 +71,7 @@ def _plot_mesh(ax: Axes, result: "OptimizeResult") -> Axes:
         kernel="thin_plate_spline",
     )
 
-    z_mesh = rbf(
-        np.column_stack([x_mesh.ravel(), y_mesh.ravel()])
-    ).reshape(x_mesh.shape)
+    z_mesh = rbf(np.column_stack([x_mesh.ravel(), y_mesh.ravel()])).reshape(x_mesh.shape)
 
     vals = z_mesh[np.isfinite(z_mesh)]
     vals_pos = vals[vals > 0]
@@ -110,7 +108,7 @@ def _plot_mesh(ax: Axes, result: "OptimizeResult") -> Axes:
     ax.scatter(r_2d[mask, 0], r_2d[mask, 1], c="slategray", s=50, zorder=3, label="Intermediate")
     ax.scatter(r_2d[best_idx, 0], r_2d[best_idx, 1], c="firebrick", s=50, zorder=4, label="Best")
     ax.legend(
-        loc='lower center',
+        loc="lower center",
         ncol=4,
         frameon=False,
         bbox_to_anchor=(0.5, -0.3),
@@ -147,16 +145,31 @@ def plot_optimisation_process(result: OptimizeResult, out_dir: Path) -> None:
     fig.tight_layout()
     fig.savefig(out_dir, dpi=300)
     fig.savefig(out_dir.parent / "trajectory.png", dpi=300)
-    fig.savefig(out_dir.parent / "trajectory.pdf", dpi=300, bbox_inches="tight", transparent=True,)
+    fig.savefig(
+        out_dir.parent / "trajectory.pdf",
+        dpi=300,
+        bbox_inches="tight",
+        transparent=True,
+    )
 
     fig, ax = plt.subplots(figsize=(9, 4))
     ax = _plot_trajectory(ax, result)
     fig.tight_layout()
-    fig.savefig(out_dir.parent / 'only_trajectory.png', dpi=300)
-    fig.savefig(out_dir.parent / 'only_trajectory.pdf', dpi=300, bbox_inches="tight", transparent=True,)
+    fig.savefig(out_dir.parent / "only_trajectory.png", dpi=300)
+    fig.savefig(
+        out_dir.parent / "only_trajectory.pdf",
+        dpi=300,
+        bbox_inches="tight",
+        transparent=True,
+    )
 
     fig, ax = plt.subplots(figsize=(5, 4))
     ax = _plot_mesh(ax, result)
     fig.tight_layout()
-    fig.savefig(out_dir.parent / 'only_mesh.png', dpi=300)
-    fig.savefig(out_dir.parent / 'only_mesh.pdf', dpi=300, bbox_inches="tight", transparent=True,)
+    fig.savefig(out_dir.parent / "only_mesh.png", dpi=300)
+    fig.savefig(
+        out_dir.parent / "only_mesh.pdf",
+        dpi=300,
+        bbox_inches="tight",
+        transparent=True,
+    )

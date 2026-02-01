@@ -9,19 +9,15 @@ from typing import Callable
 import network_diffusion as nd
 import numpy as np
 import pandas as pd
-from skopt.space import Real, Integer
+from skopt.space import Integer, Real
 from skopt.utils import OptimizeResult
 
-from mfdt.config_finder.basic_finder import (
-    get_beta_s_S_xi,
-    get_gamma_delta_Delta,
-    get_q,
-    get_r,
-    get_tau,
-)
+from mfdt.config_finder.basic_finder import (get_beta_s_S_xi,
+                                             get_gamma_delta_Delta, get_q,
+                                             get_r, get_tau)
 from mfdt.correlations import correlations
-from mfdt.params_handler import create_out_dir
 from mfdt.mln_abcd.julia_wrapper import BaseMLNConfig
+from mfdt.params_handler import create_out_dir
 
 
 def estimate_fixed_params(
@@ -90,7 +86,7 @@ def get_decision_space(decision_variables: list[str], n_layers: int) -> list[Rea
         decision_space.extend(tau_space)
     if "d" in decision_variables:
         d_space = [Integer(1, 4, name=f"d")]
-        decision_space.extend(d_space)   
+        decision_space.extend(d_space)
     return decision_space
 
 
@@ -126,6 +122,7 @@ def prepare_log_dir(out_dir: Path | None = None) -> Callable:
 @dataclass
 class SerialOptimizeResult:
     """Class to serialise logs as OptimizeResult is not serialisable."""
+
     fun: float
     x: list[float]
     func_vals: list[float]

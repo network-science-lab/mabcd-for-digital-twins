@@ -10,19 +10,18 @@ import skopt
 import yaml
 
 from mfdt.config_finder.ff_figures import plot_optimisation_process
-from mfdt.config_finder.ff_helpers import (
-    SerialOptimizeResult,
-    convert_result,
-    estimate_fixed_params,
-    get_decision_space,
-    get_stacked_arr_element_variance,
-    prepare_log_dir,
-)
+from mfdt.config_finder.ff_helpers import (SerialOptimizeResult,
+                                           convert_result,
+                                           estimate_fixed_params,
+                                           get_decision_space,
+                                           get_stacked_arr_element_variance,
+                                           prepare_log_dir)
 from mfdt.config_finder.ff_loss import get_criterium
 from mfdt.correlations.correlations import get_degrees_cor, get_partitions_cor
 from mfdt.loaders.net_loader import _prepare_network
 from mfdt.mln_abcd.julia_reader import load_edgelist
-from mfdt.mln_abcd.julia_wrapper import MLNABCDGraphGenerator, MLNConfig, BaseMLNConfig
+from mfdt.mln_abcd.julia_wrapper import (BaseMLNConfig, MLNABCDGraphGenerator,
+                                         MLNConfig)
 
 
 def prepare_objective(
@@ -185,8 +184,8 @@ def estimate_config_fancy(
     )
     print(
         f"[BEST SOLUTION in {np.where(result.func_vals == result.fun)[0][0].item() + 1}th step] ",
-        f"loss: {result.fun:.5f}, "
-        f"dv: ", {dv.name: x for (dv, x) in zip(decision_space, result.x)},
+        f"loss: {result.fun:.5f}, dv: ",
+        {dv.name: x for (dv, x) in zip(decision_space, result.x)},
     )
 
     if log_dir:
@@ -201,7 +200,7 @@ def estimate_config_fancy(
             func_vals=result.func_vals,
             x_iters=result.x_iters,
         ).dump(f"{log_dir}/optim.pkl")
-    
+
     dv_opt = convert_result(decision_space, result)
     if "r" in decision_variables:
         fixed_mabcd_params.layer_params["r"] = dv_opt["r"]

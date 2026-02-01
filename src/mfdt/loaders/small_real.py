@@ -1,24 +1,14 @@
 """A loader for small real multilayer networks stored in the dataset."""
 
-import pandas as pd
 import network_diffusion as nd
 import networkx as nx
+import pandas as pd
 
-from mfdt.loaders.constants import (
-    MLN_RAW_DATA_PATH,
-    AUCS,
-    CKM_PHYSICIANS,
-    EU_TRANSPORTATION,
-    EU_TRANSPORT_KLM,
-    FMRI74,
-    L2_COURSE_NET_1,
-    L2_COURSE_NET_2,
-    L2_COURSE_NET_3,
-    LAZEGA,
-    TOY_NETWORK,
-    WILDCARD_ALL,
-    return_some_layers,
-)
+from mfdt.loaders.constants import (AUCS, CKM_PHYSICIANS, EU_TRANSPORT_KLM,
+                                    EU_TRANSPORTATION, FMRI74, L2_COURSE_NET_1,
+                                    L2_COURSE_NET_2, L2_COURSE_NET_3, LAZEGA,
+                                    MLN_RAW_DATA_PATH, TOY_NETWORK,
+                                    WILDCARD_ALL, return_some_layers)
 from mfdt.loaders.fmri74 import read_fmri74
 
 

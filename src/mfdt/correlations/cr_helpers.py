@@ -1,12 +1,11 @@
-from copy import deepcopy
 import functools
+from copy import deepcopy
 from itertools import combinations
 from typing import Any, Literal
 
-import networkx as nx
 import network_diffusion as nd
+import networkx as nx
 import numpy as np
-
 import pandas as pd
 
 

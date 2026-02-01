@@ -1,4 +1,5 @@
-from plot_utils import load_multiple_divergence_scores, translate_fields, save_divergence_plot
+from plot_utils import (load_multiple_divergence_scores, save_divergence_plot,
+                        translate_fields)
 
 experiment_results_glob = (
     "./data/evaluate/experiment_2/bigreal/Freebase/exp_*/divergence_scores.csv"

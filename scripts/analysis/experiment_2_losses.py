@@ -1,13 +1,10 @@
-from mfdt.config_finder.ff_loss import (
-    tau_loss,
-    r_loss,
-    r_tau_loss,
-)
 from pathlib import Path
-import numpy as np
-import seaborn as sns
-import pandas as pd
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from mfdt.config_finder.ff_loss import r_loss, r_tau_loss, tau_loss
 
 dfs = []
 steps = list(range(1, 31))
@@ -63,9 +60,7 @@ merged_df = pd.concat(dfs, ignore_index=True)
 merged_df = merged_df.melt(
     id_vars=["iteration", "experiment"], var_name="Loss", value_name="Loss Value"
 )
-merged_df["Loss Type"] = merged_df["Loss"].apply(
-    lambda x: "best" if "best" in x else "current"
-)
+merged_df["Loss Type"] = merged_df["Loss"].apply(lambda x: "best" if "best" in x else "current")
 merged_df["Loss"] = merged_df["Loss"].replace(
     {
         "r_loss": "r",
@@ -102,7 +97,9 @@ for i, exp in enumerate(["exp_e", "exp_f", "exp_g"]):
     else:
         ax[i].set_xlabel("")
 plt.savefig(
-    "./data/evaluate/experiment_2/bigreal/Freebase/experiment_2_loss_best_by_method.pdf"
+    "./data/evaluate/experiment_2/bigreal/Freebase/experiment_2_loss_best_by_method.pdf",
+    dpi=300,
+    bbox_inches="tight",
 )
 
 fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(14, 4))
@@ -117,8 +114,6 @@ for i, exp in enumerate(["exp_e", "exp_f", "exp_g"]):
         hue="Loss",
         linewidth=2.0,
         linestyle="--",
-        # marker="p",
-        # markersize=6,
         palette="Blues",
     )
     ax[i].set_title(titles[i])
@@ -132,5 +127,7 @@ for i, exp in enumerate(["exp_e", "exp_f", "exp_g"]):
     else:
         ax[i].set_xlabel("")
 plt.savefig(
-    "./data/evaluate/experiment_2/bigreal/Freebase/experiment_2_loss_current_by_method.pdf"
+    "./data/evaluate/experiment_2/bigreal/Freebase/experiment_2_loss_current_by_method.pdf",
+    dpi=300,
+    bbox_inches="tight",
 )

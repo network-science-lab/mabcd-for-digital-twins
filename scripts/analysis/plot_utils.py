@@ -1,4 +1,5 @@
 from glob import glob
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
@@ -21,9 +22,7 @@ method_rename_map = {
 }
 
 
-def load_multiple_divergence_scores(
-    path_glob: str, cut_means: bool = True
-) -> pd.DataFrame:
+def load_multiple_divergence_scores(path_glob: str, cut_means: bool = True) -> pd.DataFrame:
     result_paths = glob(path_glob)
     dfs = [
         pd.read_csv(

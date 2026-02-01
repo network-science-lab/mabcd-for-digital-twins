@@ -1,17 +1,18 @@
 """Infer configuration model for real networks."""
 
 import json
-from typing import Any
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import yaml
 from tqdm import tqdm
 
-from mfdt.params_handler import Network, load_networks, create_out_dir
-from mfdt.mln_abcd.julia_wrapper import MLNABCDGraphGenerator, MLNConfig, BaseMLNConfig
 from mfdt.config_finder.basic_finder import estimate_config_rudimentarly
 from mfdt.config_finder.fancy_finder import estimate_config_fancy
+from mfdt.mln_abcd.julia_wrapper import (BaseMLNConfig, MLNABCDGraphGenerator,
+                                         MLNConfig)
+from mfdt.params_handler import Network, create_out_dir, load_networks
 
 
 def estimate_config(

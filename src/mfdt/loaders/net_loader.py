@@ -9,9 +9,9 @@ import network_diffusion as nd
 import networkx as nx
 from tqdm import tqdm
 
+from mfdt.loaders.big_real import load_big_real
 from mfdt.loaders.small_artificial import load_small_artificial
 from mfdt.loaders.small_real import load_small_real
-from mfdt.loaders.big_real import load_big_real
 from mfdt.mln_abcd.julia_reader import load_edgelist
 
 

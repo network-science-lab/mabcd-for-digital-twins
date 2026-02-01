@@ -8,8 +8,8 @@ from typing import Any
 
 import network_diffusion as nd
 
-from mfdt.loaders.net_loader import load_network
 from mfdt.loaders.constants import SEPARATOR
+from mfdt.loaders.net_loader import load_network
 
 
 class JSONEncoder(json.JSONEncoder):

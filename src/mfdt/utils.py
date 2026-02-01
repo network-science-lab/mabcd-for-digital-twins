@@ -5,7 +5,6 @@ import warnings
 
 import git
 
-
 warnings.filterwarnings(action="ignore", category=FutureWarning)
 
 
