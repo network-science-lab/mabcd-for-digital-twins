@@ -1,4 +1,4 @@
-# `mABCD` for digital twins of complex systems
+# `mABCD` for digital twins of complex networked systems
 
 A repository for retrieving digital twins of a given network using `mABCD`, a synthetic graph
 generator: from an empirical network to an `mABCD` configuration and its corresponding digital twin.
@@ -44,14 +44,14 @@ This repository is a complementary artifact for the [paper]().
 
 ## Runtime Configuration
 
-1. Install [uv](https://uv.run/) as the project is built with it.
+1. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) as the project is built with it.
 2. Install the project dependencies:
    ```bash
    uv sync
    ```
 3. Additionally, to use DVC with Google Drive as remote storage, install:
    ```bash
-   uv tool install dvc[gdrive]
+   uv tool install 'dvc[gdrive]'
    ```
 4. Download the data required for experiments using DVC:
    ```bash
