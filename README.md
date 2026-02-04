@@ -1,35 +1,57 @@
-# mABCD for digital twins of complex systems
+# `mABCD` for digital twins of complex networked systems
 
-A repository for...
+A repository for retrieving digital twins of a given network using `mABCD`, a synthetic graph
+generator: from an empirical network to an `mABCD` configuration and its corresponding digital twin.
 
-**Authors**:  (†),  (¶),  (¶),  (¬), (†),  (§)
+**Authors**: Piotr Bródka (¶†),  Michał Czuba(¶†),  Łukasz Kraiński (¬),  Bogumił Kamiński (¬),
+Katarzyna Musial (†), Paweł Prałat (§), Mateusz Stolarski (¶)
 
-- (¶)
-- (†)
-- (¬)
-- (§)
+**Affiliations**:
+- (¶) Dept. of Atrificial Intelligence, Wrocław University of Science and Technology, Wrocław, PL
+- (†) Data Science Institute, University of Technology Sydney, Sydney, AU
+- (¬) Decision Analysis and Support Unit, SGH Warsaw School of Economics, Warsaw, PL
+- (§) Dept. of Mathematics, Toronto Metropolitan University, Toronto, CA
 
-This repository is a complementary artifact for the [paper]().
+This repository is a complementary artifact for the [paper](https://arxiv.org/abs/2602.02044).
 
 ## Structure of the Repository
 
 ```bash
 .
 ├── README.md
-├── src                      -> Main code used by various scripts
-└── ...  -> ...
+├── data                           ->  DVC directory
+│   ├── evaluate                   ->  evaluation results
+│   ├── finder                     ->  retrieved twins for Freebase
+│   └── networks                   ->  raw network data
+├── pyproject.toml                 ->  project's configuratioon
+├── scripts                        ->  auxiliary files, not the project's logic
+│   ├── analysis                   ->  scripts to transform obtained results
+│   └── configs                    ->  exemplary configs to run the project
+└── src
+    └── mfdt
+        ├── config_finder          ->  module with logic to find twins
+        ├── correlations           ->  aux. scripts with various correlations
+        ├── divergences.py         ->  divergency scores
+        ├── evaluator.py           ->  job to calculate twin's divergency
+        ├── finder.py              ->  job to find twins of a given network
+        ├── generator.py           ->  job to create mABCD networks
+        ├── loaders                ->  network loaders
+        ├── main.py                ->  main entrypoint to the project
+        ├── mln_abcd               ->  Python ports to Julia impl. mABCD
+        ├── params_handler.py
+        └── utils.py
 ```
 
 ## Runtime Configuration
 
-1. Install [uv](https://uv.run/) as the project is built with it.
+1. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) as the project runs on it.
 2. Install the project dependencies:
    ```bash
    uv sync
    ```
 3. Additionally, to use DVC with Google Drive as remote storage, install:
    ```bash
-   uv tool install dvc[gdrive]
+   uv tool install 'dvc[gdrive]'
    ```
 4. Download the data required for experiments using DVC:
    ```bash
@@ -64,8 +86,6 @@ of the mABCD parameters found by the finder.
 
 ## Experiments
 
-Finder experiments ():
-
 Experiment 1:
 - exp_a: optimise [r]; loss [r]; d = 1
 - exp_b: optimise [r]; loss [r]; d = 2
@@ -83,4 +103,10 @@ Experiment 3:
 
 ## Acknowledgment
 
-This work was supported by the...
+This research was partially supported by: (1) EU under the Horizon Europe, grant no. 101086321
+OMINO; (2) Polish Ministry of Science and Higher Education, International Projects Co-Funded
+programme; (3) National Science Centre, Poland, grant no. 2022/45/B/ST6/04145; (4) Polish National
+Agency for Academic Exchange, Strategic Partnerships programme, grant no.
+BPI/PST/2024/1/00129/U/00001; (5) Wrocław University of Science and Technology, Academia Profesorum
+Iuniorum programme. Views and opinions expressed are, however, those of the authors only and do not
+necessarily reflect those of the founding agencies. 
