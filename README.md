@@ -12,7 +12,7 @@ Katarzyna Musial (†), Paweł Prałat (§), Mateusz Stolarski (¶)
 - (¬) Decision Analysis and Support Unit, SGH Warsaw School of Economics, Warsaw, PL
 - (§) Dept. of Mathematics, Toronto Metropolitan University, Toronto, CA
 
-This repository is a complementary artifact for the [paper]().
+This repository is a complementary artifact for the [paper](https://arxiv.org/abs/2602.02044).
 
 ## Structure of the Repository
 
@@ -44,7 +44,7 @@ This repository is a complementary artifact for the [paper]().
 
 ## Runtime Configuration
 
-1. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) as the project is built with it.
+1. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) as the project runs on it.
 2. Install the project dependencies:
    ```bash
    uv sync
