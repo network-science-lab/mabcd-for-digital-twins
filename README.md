@@ -12,7 +12,9 @@ Katarzyna Musial (†), Paweł Prałat (§), Mateusz Stolarski (¶)
 - (¬) Decision Analysis and Support Unit, SGH Warsaw School of Economics, Warsaw, PL
 - (§) Dept. of Mathematics, Toronto Metropolitan University, Toronto, CA
 
-This repository is a complementary artifact for the [paper](https://arxiv.org/abs/2602.02044).
+This repository is a complementary artifact for the [paper](https://arxiv.org/abs/2602.02044)
+presented at the 21st Workshop on Modelling and Mining Networks
+([WAW 2026](https://math.torontomu.ca/waw2026/)), Toronto, ON, Canada, 15-19 June 2026.
 
 ## Structure of the Repository
 
@@ -44,12 +46,17 @@ This repository is a complementary artifact for the [paper](https://arxiv.org/ab
 
 ## Runtime Configuration
 
-1. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) as the project runs on it.
-2. Install the project dependencies:
+1. Install [uv](https://docs.astral.sh/uv/getting-started/installation/). `uv` manages the Python
+   environment and dependency installation for this project.
+2. From the repository root, sync the project environment and install dependencies:
    ```bash
    uv sync
    ```
-3. Additionally, to use DVC with Google Drive as remote storage, install:
+3. Resolve Julia dependencies (required on first setup):
+   ```bash
+   uv run python -c "import juliapkg; juliapkg.resolve(force=True)"
+   ```
+4. Additionally, to use DVC with Google Drive as remote storage, install:
    ```bash
    uv tool install 'dvc[gdrive]'
    ```
